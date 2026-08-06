@@ -18,3 +18,5 @@ CareerPilot is an AI-powered career platform that helps job seekers prepare for 
 - React
 - Docker
 - OpenAI API
+
+This is my first AI Engineering project.
