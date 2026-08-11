@@ -35,3 +35,16 @@ class JobRequirements(BaseModel):
     summary: str
     requirements: list[Requirement]
 
+class MatchStatus(str, Enum):
+    MATCHED = "matched"
+    PARTIAL = "partial"
+    MISSING = "missing"
+
+class RequirementMatch(BaseModel):
+    requirement_name: str
+    status: MatchStatus
+    evidence: str | None = None
+    reason: str
+
+class ResumeMatchResult(BaseModel):
+    matches: list[RequirementMatch]
