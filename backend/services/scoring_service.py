@@ -1,10 +1,13 @@
 from backend.models.analysis import (
+    Gap,
     JobRequirements,
+    MatchAnalysis,
     MatchStatus,
     Requirement,
     RequirementImportance,
     RequirementMatch,
     ResumeMatchResult,
+    Strength,
 )
 
 MATCH_VALUES = {
@@ -55,3 +58,57 @@ def calculate_match_score(
         2
     )
 
+def build_match_analysis(match_result: ResumeMatchResult) -> MatchAnalysis:
+    strengths = []
+    gaps = []
+
+    for match in match_result.matches:
+        if match.status == MatchStatus.MATCHED:
+            strengths.append(
+                Strength(
+                    area=match.requirement_name,
+                    evidence=match.evidence,
+                    reason=match.reason
+                )
+            )
+        else:
+            gaps.append(
+                Gap(
+                    area=match.requirement_name,
+                    status=match.status,
+                    evidence=match.evidence,
+                    reason=match.reason
+                )
+            )
+
+    return MatchAnalysis(
+        strengths=strengths,
+        gaps=gaps
+    )
+
+test_matches = ResumeMatchResult(
+    matches=[
+        RequirementMatch(
+            requirement_name="Python",
+            status="matched",
+            evidence="Built backend APIs using Python.",
+            reason="The resume demonstrates practical Python experience."
+        ),
+        RequirementMatch(
+            requirement_name="AWS",
+            status="partial",
+            evidence="AWS is listed in the Skills section.",
+            reason="AWS is mentioned but practical experience is not demonstrated."
+        ),
+        RequirementMatch(
+            requirement_name="Docker",
+            status="missing",
+            evidence=None,
+            reason="Docker is not mentioned in the resume."
+        )
+    ]
+)
+
+analysis = build_match_analysis(test_matches)
+
+print(analysis)

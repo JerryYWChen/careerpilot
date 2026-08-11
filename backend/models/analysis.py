@@ -48,3 +48,24 @@ class RequirementMatch(BaseModel):
 
 class ResumeMatchResult(BaseModel):
     matches: list[RequirementMatch]
+
+class Strength(BaseModel):
+    area: str
+    evidence: str
+    reason: str
+
+
+class Gap(BaseModel):
+    area: str
+    status: MatchStatus
+    evidence: str | None = None
+    reason: str
+
+
+class MatchAnalysis(BaseModel):
+    strengths: list[Strength]
+    gaps: list[Gap]
+
+class Recommendations(BaseModel):
+    highlight: list[str]
+    strengthen: list[str]

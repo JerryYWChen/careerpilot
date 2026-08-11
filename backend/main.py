@@ -6,9 +6,13 @@ from backend.models.resume import Resume
 from backend.services.resume_service import extract_text_from_pdf
 from backend.services.ai_service import (
     analyze_job_description,
+    generate_recommendations,
     match_resume_to_requirements,
 )
-from backend.services.scoring_service import calculate_match_score
+from backend.services.scoring_service import (
+    build_match_analysis,
+    calculate_match_score,
+)
 
 
 
@@ -80,11 +84,22 @@ async def analyze_resume(resume_id: int, request: AnalyzeRequest, db: Session = 
         match_result,
         job_requirements
     )
-    
+
+    match_analysis = build_match_analysis(
+        match_result
+    )
+
+    recommendations = generate_recommendations(
+        resume.extracted_text,
+        job_requirements,
+        match_analysis
+    )
     return {
     "resume_id": resume.id,
     "filename": resume.filename,
     "job": job_requirements,
-    "matches": match_result.matches,
-    "match_score": match_score
+    "match_score": match_score,
+    "strengths": match_analysis.strengths,
+    "gaps": match_analysis.gaps,
+    "recommendations": recommendations
     }
