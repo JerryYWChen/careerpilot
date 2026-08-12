@@ -46,17 +46,42 @@ def match_resume_to_requirements(
                 "content": (
                     "Evaluate the resume against every provided job requirement. "
                     "Return exactly one match result for every requirement. "
-                    "Use only evidence that appears in the resume. "
-                    "Do not invent candidate skills or experience. "
-                    "Use 'matched' when the resume provides clear evidence of the requirement "
-                    "through direct statements or strong contextual evidence from projects, "
-                    "work experience, research, education, or related technologies. "
-                    "Do not require the exact requirement keyword to appear in a bullet point. "
-                    "Use 'partial' when the requirement is only listed as a skill or is "
-                    "supported by weak or indirect evidence. "
-                    "Use 'missing' only when there is no reasonable evidence in the resume "
-                    "supporting the requirement. "
-                    "When using contextual evidence, explain the connection in the reason. "
+
+                    "Use only information and evidence contained in the resume. "
+                    "Do not invent, assume, or exaggerate the candidate's skills, experience, "
+                    "achievements, or qualifications. "
+
+                    "Evaluate the total strength of the evidence for each requirement. "
+                    "Evidence may come from skills, work experience, projects, research, "
+                    "education, certifications, technologies, frameworks, libraries, or "
+                    "implementation details. Consider multiple pieces of related evidence "
+                    "together rather than evaluating each piece in isolation. "
+
+                    "Classify a requirement as 'matched' when the resume provides either direct "
+                    "evidence or strong contextual evidence that reliably demonstrates the "
+                    "requirement. Strong contextual evidence can come from a combination of "
+                    "related technologies, frameworks, libraries, and concrete implementation "
+                    "work, even when the exact requirement keyword is not explicitly stated. "
+
+                    "Classify a requirement as 'partial' when relevant evidence exists but is "
+                    "weak, incomplete, indirect, or insufficient to reliably establish the "
+                    "requirement. A skill that is only listed in the Skills section without "
+                    "supporting contextual or practical evidence should normally be classified "
+                    "as 'partial'. "
+
+                    "Classify a requirement as 'missing' when the resume provides no reasonable "
+                    "evidence supporting the requirement. Do not infer a requirement merely from "
+                    "a broadly related field, coursework, or a single weakly related technology. "
+
+                    "For requirements that specify a minimum number of years, compare the resume "
+                    "evidence with the required number of years. If relevant experience exists "
+                    "but the minimum number of years is not satisfied or cannot be clearly "
+                    "established, classify the requirement as 'partial'. "
+
+                    "Provide evidence from the resume whenever evidence exists. "
+                    "Explain why the evidence supports the classification. "
+                    "When relying on contextual evidence, explain how the combination of evidence "
+                    "reliably supports the requirement."
                 ),
             },
             {
