@@ -16,11 +16,14 @@ The project is currently under active development.
 * Match resume evidence against individual job requirements
 * Support direct and contextual resume evidence
 * Classify requirements as matched, partial, or missing
+* Track which resume sections provide evidence for each requirement
+* Generate evidence-based explanations for match decisions
 * Calculate deterministic weighted resume-to-job match scores
 * Identify resume strengths and job requirement gaps
 * Generate AI-powered resume improvement recommendations
 * Prevent unsupported or fabricated experience from being recommended
 * Evaluate AI matching behavior against human-defined expected results
+* Evaluate evidence-source attribution against human-defined ground truth
 * Run repeated evaluation cases to measure matching consistency
 * Log detailed failure information for AI evaluation debugging
 * REST API built with FastAPI
@@ -86,7 +89,11 @@ Evidence-Based Matching
       ↓
 ResumeMatchResult
       ↓
-matched / partial / missing
+RequirementMatch
+├── status
+├── evidence
+├── evidence_sources
+└── reason
 ```
 
 The language model is responsible for understanding resume evidence and determining how strongly the resume supports each job requirement.
@@ -123,7 +130,7 @@ Python Scoring          │
 
 AI is used for semantic understanding and recommendation generation.
 
-Python is used for deterministic business logic such as scoring, requirement completeness validation, and strength/gap classification.
+Python is used for deterministic business logic such as scoring, requirement completeness validation, strength/gap classification, and evaluation.
 
 ### Evaluation Pipeline
 
@@ -132,42 +139,47 @@ MatchingEvalCase
 ├── Resume Text
 ├── JobRequirements
 └── Expected Matches
-        ↓
-Resume Matcher
-        ↓
-Actual ResumeMatchResult
-        ↓
-Compare Against
-Human-Defined Ground Truth
-        ↓
-PASS / FAIL
-        ↓
-Repeat N Times
-        ↓
-Consistency %
-        ↓
-Evaluation Summary
+        │
+        ├── Expected Status
+        └── Expected Evidence Sources
+                    ↓
+              Resume Matcher
+                    ↓
+          Actual ResumeMatchResult
+                    ↓
+          Compare Against Ground Truth
+                    ↓
+                PASS / FAIL
+                    ↓
+              Repeat N Times
+                    ↓
+              Consistency %
+                    ↓
+            Evaluation Summary
 ```
 
-The evaluation system allows matcher behavior to be tested repeatedly against predefined expected results.
+The evaluation system allows matcher behavior to be tested repeatedly against predefined human-defined expected results.
 
 This provides a repeatable way to detect:
 
 * Incorrect match classifications
+* Incorrect evidence-source attribution
 * Prompt regressions
 * Inconsistent model behavior
 * Overly aggressive contextual inference
 * Overly conservative evidence interpretation
 
-When an evaluation fails, the runner records:
+When an evaluation fails, the runner can report:
 
 * Requirement name
 * Expected status
 * Actual status
+* Expected evidence sources
+* Actual evidence sources
 * Evidence selected by the model
 * Model reasoning
 
-This makes matcher failures easier to diagnose before changing prompts or product rules.
+This makes matcher failures easier to diagnose before changing prompts, schemas, or product rules.
 
 ## Matching Logic
 
@@ -191,7 +203,7 @@ The resume provides relevant evidence, but the evidence is incomplete, indirect,
 Examples include:
 
 * A skill appears only in the Skills section without supporting evidence
-* Strong related context exists, but the exact required skill is not sufficiently established
+* Related contextual evidence exists but does not reliably establish the exact requirement
 * Relevant experience exists but does not fully satisfy the requirement
 * The job requires a certain amount of experience but the resume does not clearly demonstrate that amount
 
@@ -200,6 +212,75 @@ Examples include:
 The resume provides no reasonable evidence supporting the requirement.
 
 The matcher is instructed not to infer requirements merely from broadly related coursework, fields of study, or weakly related technologies.
+
+## Evidence Sources
+
+CareerPilot tracks which sections of the resume provide evidence supporting each requirement classification.
+
+Current evidence-source categories include:
+
+```text
+skills
+experience
+projects
+research
+education
+certifications
+```
+
+A requirement may contain multiple evidence sources.
+
+For example:
+
+```text
+Python
+├── status: matched
+├── evidence_sources
+│   ├── skills
+│   └── experience
+├── evidence
+│   └── Python is listed as a skill and used in backend API development.
+└── reason
+    └── Direct skill evidence is supported by practical implementation experience.
+```
+
+A skill that appears only in the Skills section may look like:
+
+```text
+AWS
+├── status: partial
+├── evidence_sources
+│   └── skills
+└── reason
+    └── AWS is listed, but supporting practical evidence is not provided.
+```
+
+A missing requirement may contain no evidence sources:
+
+```text
+Docker
+├── status: missing
+├── evidence_sources: []
+└── evidence: None
+```
+
+Evidence sources represent resume sections that contribute supporting evidence to the requirement analysis.
+
+They are separate from the final match status.
+
+For example, two requirements may both use evidence from Skills and Experience while receiving different statuses because one fully satisfies the job requirement and the other does not.
+
+This separation allows CareerPilot to distinguish:
+
+```text
+Where did the evidence come from?
+```
+
+from:
+
+```text
+Is the evidence sufficient to satisfy the requirement?
+```
 
 ## Match Score
 
@@ -323,7 +404,7 @@ If a skill is missing, the system should recommend gaining the experience before
 
 ## AI Matching Evaluation
 
-CareerPilot includes a repeatable evaluation suite for testing the behavior and consistency of the resume matcher.
+CareerPilot includes a repeatable evaluation suite for testing both the behavior and explainability of the resume matcher.
 
 Each evaluation case contains:
 
@@ -333,68 +414,163 @@ MatchingEvalCase
 ├── resume_text
 ├── job_requirements
 └── expected_matches
+    └── ExpectedMatch
+        ├── status
+        └── evidence_sources
 ```
 
-The expected matches are human-defined ground truth rather than model-generated answers.
+The expected results are human-defined ground truth rather than model-generated answers.
+
+Evidence-source expectations can also be optional, allowing evaluation cases to be migrated or expanded incrementally.
 
 ### Current Evaluation Coverage
 
-The current evaluation suite covers scenarios including:
+The current active evaluation suite covers scenarios including:
 
 * Mixed matched, partial, and missing evidence
 * Minimum years of experience requirements
 * Strong direct implementation evidence
 * Completely missing evidence
-* Strong contextual evidence without an exact keyword
+* Insufficient contextual evidence without an exact keyword
 * Framework-to-language contextual evidence
 * Backend framework-to-language evidence
 * Concrete tool evidence supporting a broader concept
-* Weak contextual evidence that should not be over-inferred
 * Explicit skills combined with strong contextual evidence
+
+The suite currently contains nine active evaluation cases.
+
+### Classification Evaluation
+
+The evaluator checks whether the model returns the expected status:
+
+```text
+matched
+partial
+missing
+```
+
+If the status differs from human-defined ground truth, the case fails.
+
+### Evidence-Source Evaluation
+
+The evaluator can also compare expected and actual evidence sources.
+
+For example:
+
+```text
+Expected:
+status = matched
+sources = [skills, experience]
+
+Actual:
+status = matched
+sources = [skills, experience]
+
+→ PASS
+```
+
+If the classification is correct but the evidence attribution is incorrect:
+
+```text
+Expected:
+sources = [skills, experience]
+
+Actual:
+sources = [skills]
+
+→ FAIL
+```
+
+Evidence-source comparison ignores ordering.
+
+Therefore:
+
+```text
+[skills, experience]
+```
+
+and:
+
+```text
+[experience, skills]
+```
+
+are treated as equivalent.
 
 ### Repeated Consistency Evaluation
 
-Each case can be executed multiple times to measure whether the model consistently produces the expected classification.
+Each case can be executed multiple times to measure whether the model consistently produces the expected result.
 
 Example:
 
 ```text
-=== Skills Plus Strong Context ===
+=== Backend Framework Context Supports Language ===
 Run 1: PASS
 Run 2: PASS
 Run 3: PASS
 Consistency: 3/3 (100%)
 ```
 
-The evaluation runner also generates an overall summary:
+This allows CareerPilot to measure not only whether a model can produce the correct answer, but whether it can produce that behavior consistently across repeated runs.
+
+### Failure Diagnostics
+
+When a run fails, the evaluator provides detailed diagnostics.
+
+Example:
 
 ```text
-=== Evaluation Summary ===
-Mixed Evidence: 3/3 (100%)
-Insufficient Years: 3/3 (100%)
-Strong Direct Evidence: 3/3 (100%)
-No Evidence: 3/3 (100%)
-Strong Contextual Evidence Without Exact Keyword: 3/3 (100%)
-Framework Context Supports Language: 3/3 (100%)
-Backend Framework Context Supports Language: 3/3 (100%)
-Concrete Tool Evidence Supports Broader Concept: 3/3 (100%)
-Weak Contextual Evidence Is Not Sufficient: 3/3 (100%)
-Skills Plus Strong Context: 3/3 (100%)
+FAIL: Python
+expected status: missing
+actual status: partial
 
-Overall Run Accuracy: 30/30 (100.0%)
+expected sources: []
+actual sources: [projects]
+
+evidence:
+The resume describes related machine learning project experience.
+
+reason:
+The model interpreted the projects as indirect contextual evidence.
 ```
 
-This represents the current Matcher Eval v1 baseline:
+This allows failures to be reviewed before changing the matcher prompt or ground-truth expectations.
+
+### Current Evaluation Baseline
+
+The latest full regression run contains:
 
 ```text
-Evaluation cases: 10
+Active evaluation cases: 9
 Runs per case: 3
-Total evaluation runs: 30
-Passing runs: 30
-Current baseline: 100%
+Total evaluation runs: 27
+Passing runs: 26
+Overall run accuracy: 96.3%
 ```
 
-This baseline applies only to the current evaluation suite and should not be interpreted as 100% accuracy across all possible resumes and job descriptions.
+Eight active cases achieved:
+
+```text
+3/3 passing
+100% consistency
+```
+
+One contextual-evidence boundary case produced:
+
+```text
+2/3 passing
+67% consistency
+```
+
+The boundary case involves highly related contextual evidence that does not explicitly establish the required skill.
+
+The model may occasionally classify this evidence as `partial` rather than `missing`.
+
+This case is intentionally retained because it helps measure uncertainty around the boundary between insufficient evidence and weak indirect evidence.
+
+The current evaluation baseline should not be interpreted as 96.3% accuracy across all possible resumes and job descriptions.
+
+It represents performance only on the current human-defined evaluation suite.
 
 New real-world failure patterns can be converted into additional evaluation cases before matcher behavior or prompts are changed.
 
@@ -421,7 +597,9 @@ New real-world failure patterns can be converted into additional evaluation case
 * OpenAI API
 * Structured Outputs
 * Pydantic-based AI response validation
+* Evidence-based requirement matching
 * Ground-truth matching evaluations
+* Evidence-source evaluation
 * Repeated consistency testing
 
 ### Frontend
@@ -481,9 +659,10 @@ The endpoint:
 2. Extracts structured requirements from the job description
 3. Matches resume evidence against every requirement
 4. Classifies requirements as matched, partial, or missing
-5. Calculates a deterministic weighted match score
-6. Builds strengths and gaps
-7. Generates actionable AI recommendations
+5. Identifies the resume sections supporting each requirement
+6. Calculates a deterministic weighted match score
+7. Builds strengths and gaps
+8. Generates actionable AI recommendations
 
 Example request:
 
@@ -529,7 +708,7 @@ Example response structure:
     {
       "area": "Python",
       "evidence": "Resume evidence supporting practical Python experience.",
-      "reason": "The resume provides direct or strong contextual evidence of Python usage."
+      "reason": "The resume provides sufficient evidence of Python usage."
     }
   ],
   "gaps": [
@@ -589,7 +768,19 @@ ResumeMatchResult
     ├── requirement_name
     ├── status
     ├── evidence
+    ├── evidence_sources[]
     └── reason
+```
+
+Evidence sources currently include:
+
+```text
+skills
+experience
+projects
+research
+education
+certifications
 ```
 
 ### Match Analysis Schema
@@ -616,7 +807,20 @@ Recommendations
 └── strengthen[]
 ```
 
-Pydantic models and enums validate AI-generated structured data before it enters downstream business logic.
+### Evaluation Schema
+
+```text
+MatchingEvalCase
+├── name
+├── resume_text
+├── job_requirements
+└── expected_matches
+    └── ExpectedMatch
+        ├── status
+        └── evidence_sources
+```
+
+Pydantic models and enums validate AI-generated structured data and evaluation expectations before they enter downstream business logic.
 
 ## Development Progress
 
@@ -650,6 +854,8 @@ Pydantic models and enums validate AI-generated structured data before it enters
 * [x] Match resume evidence against individual job requirements
 * [x] Support direct and contextual resume evidence
 * [x] Classify requirements as matched, partial, or missing
+* [x] Track evidence sources for requirement matches
+* [x] Generate evidence-based explanations
 * [x] Calculate deterministic weighted match scores
 * [x] Detect incomplete AI match results before scoring
 * [x] Generate strengths and gaps
@@ -666,20 +872,25 @@ Pydantic models and enums validate AI-generated structured data before it enters
 * [x] Measure per-case matching consistency
 * [x] Calculate overall evaluation accuracy
 * [x] Add detailed failure logging with evidence and reasoning
-* [x] Establish Matcher Eval v1 baseline
+* [x] Add evidence-source ground truth
+* [x] Evaluate evidence-source attribution
+* [x] Detect evidence-source mismatches
+* [x] Establish Status + Evidence Source Eval v1 baseline
+* [x] Identify and retain contextual-evidence boundary cases
 * [ ] Expand evaluation coverage with real-world resume and job-description cases
 * [ ] Track evaluation results across matcher or prompt versions
 
 ### Planned
 
-* [ ] Candidate experience analysis and estimated relevant experience
-* [ ] Recommendation prioritization
-* [ ] Expanded AI evaluation coverage
-* [ ] Interview question generation
-* [ ] Mock interview feedback
-* [ ] User authentication
-* [ ] Frontend application
-* [ ] Production deployment
+* [ ] Expand requirement evidence analysis and explainability
+* [ ] Analyze candidate experience and estimated relevant experience
+* [ ] Add recommendation prioritization
+* [ ] Expand AI evaluation coverage using real-world failures
+* [ ] Generate interview questions based on resume and job gaps
+* [ ] Add mock interview feedback
+* [ ] Build user authentication
+* [ ] Build frontend application
+* [ ] Deploy to production
 
 ## Project Structure
 
@@ -711,8 +922,10 @@ The core CareerPilot v0.1 resume analysis pipeline is functional end-to-end.
 
 CareerPilot can currently process a PDF resume, store it, analyze a job description, evaluate resume evidence against structured requirements, calculate an explainable match score, identify strengths and gaps, and generate actionable resume recommendations.
 
-The project also includes a repeatable AI matching evaluation suite with human-defined ground truth, repeated consistency testing, aggregate accuracy reporting, and detailed failure diagnostics.
+The matcher now also tracks which resume sections provide evidence for each requirement, allowing CareerPilot to distinguish the source of the evidence from whether that evidence is sufficient to satisfy the job requirement.
 
-The current Matcher Eval v1 baseline contains 10 evaluation cases executed three times each, with 30 of 30 evaluation runs passing in the current baseline.
+The project includes a repeatable AI evaluation suite with human-defined ground truth, repeated consistency testing, status evaluation, evidence-source evaluation, aggregate accuracy reporting, and detailed failure diagnostics.
 
-The next development focus is expanding evaluation coverage with real-world cases, analyzing candidate experience, improving recommendation prioritization, and continuing toward a user-facing frontend.
+The latest Status + Evidence Source Eval v1 regression contains nine active cases executed three times each. Twenty-six of twenty-seven runs passed, producing a 96.3% overall run accuracy on the current evaluation suite. Eight cases achieved 100% consistency, while one contextual-evidence boundary case remains intentionally tracked for model consistency.
+
+The next development focus is expanding requirement-level explainability, analyzing candidate experience, expanding evaluation coverage with real-world cases, and continuing toward a user-facing frontend.
