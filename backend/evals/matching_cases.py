@@ -4,13 +4,18 @@ from backend.models.analysis import (
     JobRequirements,
     MatchStatus,
     Requirement,
+    EvidenceSource,
 )
+
+class ExpectedMatch(BaseModel):
+    status: MatchStatus
+    evidence_sources: list[EvidenceSource]
 
 class MatchingEvalCase(BaseModel):
     name: str
     resume_text: str
     job_requirements: JobRequirements
-    expected_matches: dict[str, MatchStatus]
+    expected_matches: dict[str, ExpectedMatch]
 
 case_1 = MatchingEvalCase(
     name="Mixed Evidence",
@@ -46,9 +51,23 @@ Built backend REST APIs using Python.
         ]
     ),
     expected_matches={
-        "Python": MatchStatus.MATCHED,
-        "AWS": MatchStatus.PARTIAL,
-        "Docker": MatchStatus.MISSING,
+        "Python": ExpectedMatch(
+            status=MatchStatus.MATCHED,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.EXPERIENCE,
+            ],
+        ),
+        "AWS": ExpectedMatch(
+            status=MatchStatus.PARTIAL,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+            ],
+        ),
+        "Docker": ExpectedMatch(
+            status=MatchStatus.MISSING,
+            evidence_sources=[],
+        ),
     }
 )
 
@@ -78,7 +97,13 @@ Built backend applications using Python.
         ]
     ),
     expected_matches={
-        "Python": MatchStatus.PARTIAL,
+        "Python": ExpectedMatch(
+            status=MatchStatus.PARTIAL,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.EXPERIENCE,
+            ],
+        ),
     }
 )
 
@@ -107,7 +132,13 @@ Created a Dockerfile, built Docker images, and ran the application in containers
         ]
     ),
     expected_matches={
-        "Docker": MatchStatus.MATCHED,
+        "Docker": ExpectedMatch(
+            status=MatchStatus.MATCHED,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.PROJECTS,
+            ],
+        ),
     }
 )
 
@@ -136,12 +167,15 @@ Developed enterprise applications and database integrations.
         ]
     ),
     expected_matches={
-        "Python": MatchStatus.MISSING,
+        "Python": ExpectedMatch(
+            status=MatchStatus.MISSING,
+            evidence_sources=[],
+        ),
     }
 )
 
 case_5 = MatchingEvalCase(
-    name="Strong Contextual Evidence Without Exact Keyword",
+    name="Insufficient Context Without Exact Keyword",
     resume_text="""
 Machine Learning Engineer
 
@@ -166,7 +200,10 @@ Implemented training and evaluation workflows for machine learning experiments.
         ]
     ),
     expected_matches={
-        "Python": MatchStatus.PARTIAL,
+        "Python": ExpectedMatch(
+            status=MatchStatus.MISSING,
+            evidence_sources=[],
+        ),
     }
 )
 
@@ -195,7 +232,13 @@ Implemented reusable components and client-side state management.
         ]
     ),
     expected_matches={
-        "JavaScript": MatchStatus.MATCHED,
+        "JavaScript": ExpectedMatch(
+            status=MatchStatus.MATCHED,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.PROJECTS,
+            ],
+        ),
     }
 )
 
@@ -224,7 +267,13 @@ Implemented database models, API endpoints, and CRUD operations.
         ]
     ),
     expected_matches={
-        "Python": MatchStatus.MATCHED,
+        "Python": ExpectedMatch(
+            status=MatchStatus.MATCHED,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.PROJECTS,
+            ],
+        ),
     }
 )
 
@@ -250,39 +299,16 @@ Built Docker images and ran multiple services using Docker Compose.
         ]
     ),
     expected_matches={
-        "Containerization": MatchStatus.MATCHED,
+        "Containerization": ExpectedMatch(
+            status=MatchStatus.MATCHED,
+            evidence_sources=[
+                EvidenceSource.PROJECTS,
+            ],
+        ),
     }
 )
 
 case_9 = MatchingEvalCase(
-    name="Weak Contextual Evidence Is Not Sufficient",
-    resume_text="""
-Student
-
-Skills:
-Machine Learning
-
-Coursework:
-Completed coursework in machine learning and artificial intelligence.
-""",
-    job_requirements=JobRequirements(
-        job_title="Machine Learning Engineer",
-        seniority_level="entry",
-        summary="Machine learning role requiring Python experience.",
-        requirements=[
-            Requirement(
-                name="Python",
-                category="skill",
-                importance="required"
-            )
-        ]
-    ),
-    expected_matches={
-        "Python": MatchStatus.MISSING,
-    }
-)
-
-case_10 = MatchingEvalCase(
     name="Skills Plus Strong Context",
     resume_text="""
 Machine Learning Engineer
@@ -308,7 +334,13 @@ Built an LLM evaluation pipeline for benchmarking model performance.
         ]
     ),
     expected_matches={
-        "Python": MatchStatus.MATCHED,
+        "Python": ExpectedMatch(
+            status=MatchStatus.MATCHED,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.PROJECTS,
+            ],
+        ),
     }
 )
 
@@ -322,5 +354,4 @@ MATCHING_EVAL_CASES = [
     case_7,
     case_8,
     case_9,
-    case_10,
 ]

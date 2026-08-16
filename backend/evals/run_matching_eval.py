@@ -30,7 +30,7 @@ for case in MATCHING_EVAL_CASES:
         passed = 0
         total = len(case.expected_matches)
 
-        for requirement_name, expected_status in case.expected_matches.items():
+        for requirement_name, expected_match in case.expected_matches.items():
             actual_match = find_actual_match(
                 requirement_name,
                 actual_result
@@ -38,18 +38,69 @@ for case in MATCHING_EVAL_CASES:
 
             if actual_match is None:
                 print(f"  FAIL: {requirement_name}")
-                print(f"    expected: {expected_status.value}")
-                print("    actual:   no match returned")
+                print(f"    expected status: {expected_match.status.value}")
+                print("    actual: no match returned")
+                continue
 
-            elif actual_match.status == expected_status:
+            status_matches = (
+                actual_match.status == expected_match.status
+            )
+
+            sources_match = (
+                expected_match.evidence_sources is None
+                or set(actual_match.evidence_sources)
+                == set(expected_match.evidence_sources)
+            )
+
+            if status_matches and sources_match:
                 passed += 1
 
             else:
                 print(f"  FAIL: {requirement_name}")
-                print(f"    expected: {expected_status.value}")
-                print(f"    actual:   {actual_match.status.value}")
+
+                if not status_matches:
+                    print(
+                        f"    expected status: "
+                        f"{expected_match.status.value}"
+                    )
+                    print(
+                        f"    actual status:   "
+                        f"{actual_match.status.value}"
+                    )
+
+                if not sources_match:
+                    print(
+                        f"    expected sources: "
+                        f"{expected_match.evidence_sources}"
+                    )
+                    print(
+                        f"    actual sources:   "
+                        f"{actual_match.evidence_sources}"
+                    )
+
                 print(f"    evidence: {actual_match.evidence}")
                 print(f"    reason:   {actual_match.reason}")
+        # for requirement_name, expected_match in case.expected_matches.items():
+        #     actual_match = find_actual_match(
+        #         requirement_name,
+        #         actual_result
+        #     )
+        #     print(actual_result)
+
+        #     if actual_match is None:
+        #         print(f"  FAIL: {requirement_name}")
+        #         print(f"    expected: {expected_match.status.value}")
+        #         print("    actual:   no match returned")
+
+        #     elif actual_match.status == expected_match.status:
+        #         passed += 1
+
+        #     else:
+        #         print(f"  FAIL: {requirement_name}")
+        #         print(f"    expected: {expected_match.status.value}")
+        #         print(f"    actual:   {actual_match.status.value}")
+        #         print(f"    evidence: {actual_match.evidence}")
+        #         print(f"    reason:   {actual_match.reason}")
 
         if passed == total:
             case_passes += 1
@@ -98,3 +149,4 @@ print(
     f"{total_passes}/{total_runs} "
     f"({overall_accuracy:.1f}%)"
 )
+

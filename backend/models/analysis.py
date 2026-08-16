@@ -40,10 +40,19 @@ class MatchStatus(str, Enum):
     PARTIAL = "partial"
     MISSING = "missing"
 
+class EvidenceSource(str, Enum):
+    SKILLS = "skills"
+    EXPERIENCE = "experience"
+    PROJECTS = "projects"
+    RESEARCH = "research"
+    EDUCATION = "education"
+    CERTIFICATIONS = "certifications"
+
 class RequirementMatch(BaseModel):
     requirement_name: str
     status: MatchStatus
     evidence: str | None = None
+    evidence_sources: list[EvidenceSource]
     reason: str
 
 class ResumeMatchResult(BaseModel):
