@@ -48,11 +48,16 @@ class EvidenceSource(str, Enum):
     EDUCATION = "education"
     CERTIFICATIONS = "certifications"
 
+class EvidenceType(str, Enum):
+    DIRECT = "direct"
+    CONTEXTUAL = "contextual"
+
 class RequirementMatch(BaseModel):
     requirement_name: str
     status: MatchStatus
     evidence: str | None = None
     evidence_sources: list[EvidenceSource]
+    evidence_types: list[EvidenceType]
     reason: str
 
 class ResumeMatchResult(BaseModel):

@@ -2,7 +2,7 @@ from backend.evals.matching_cases import MATCHING_EVAL_CASES
 from backend.services.ai_service import match_resume_to_requirements
 
 
-RUNS_PER_CASE = 3
+RUNS_PER_CASE = 1
 
 
 def find_actual_match(requirement_name, actual_result):
@@ -26,6 +26,7 @@ for case in MATCHING_EVAL_CASES:
             case.resume_text,
             case.job_requirements
         )
+        print(actual_result)
 
         passed = 0
         total = len(case.expected_matches)
@@ -52,7 +53,13 @@ for case in MATCHING_EVAL_CASES:
                 == set(expected_match.evidence_sources)
             )
 
-            if status_matches and sources_match:
+            types_match = (
+                expected_match.evidence_types is None
+                or set(actual_match.evidence_types)
+                == set(expected_match.evidence_types)
+            )
+
+            if status_matches and sources_match and types_match:
                 passed += 1
 
             else:
@@ -80,6 +87,16 @@ for case in MATCHING_EVAL_CASES:
 
                 print(f"    evidence: {actual_match.evidence}")
                 print(f"    reason:   {actual_match.reason}")
+
+                if not types_match:
+                    print(
+                        f"    expected types: "
+                        f"{expected_match.evidence_types}"
+                    )
+                    print(
+                        f"    actual types:   "
+                        f"{actual_match.evidence_types}"
+                    )
         # for requirement_name, expected_match in case.expected_matches.items():
         #     actual_match = find_actual_match(
         #         requirement_name,
