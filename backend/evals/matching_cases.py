@@ -5,13 +5,11 @@ from backend.models.analysis import (
     MatchStatus,
     Requirement,
     EvidenceSource,
-    EvidenceType,
 )
 
 class ExpectedMatch(BaseModel):
     status: MatchStatus
     evidence_sources: list[EvidenceSource]
-    evidence_types: list[EvidenceType] | None = None
 
 class MatchingEvalCase(BaseModel):
     name: str
@@ -59,24 +57,16 @@ Built backend REST APIs using Python.
                 EvidenceSource.SKILLS,
                 EvidenceSource.EXPERIENCE,
             ],
-            evidence_types=[
-                EvidenceType.DIRECT,
-                EvidenceType.DIRECT,
-            ],
         ),
         "AWS": ExpectedMatch(
             status=MatchStatus.PARTIAL,
             evidence_sources=[
                 EvidenceSource.SKILLS,
             ],
-            evidence_types=[
-                EvidenceType.DIRECT,
-            ],
         ),
         "Docker": ExpectedMatch(
             status=MatchStatus.MISSING,
             evidence_sources=[],
-            evidence_types=[],
         ),
     }
 )
@@ -350,22 +340,18 @@ Built an LLM evaluation pipeline for benchmarking model performance.
                 EvidenceSource.SKILLS,
                 EvidenceSource.PROJECTS,
             ],
-            evidence_types=[
-                EvidenceType.DIRECT,
-                EvidenceType.CONTEXTUAL,
-            ],
-        )
+        ),
     }
 )
 
 MATCHING_EVAL_CASES = [
     case_1,
-    # case_2,
-    # case_3,
-    # case_4,
-    # case_5,
-    # case_6,
-    # case_7,
-    # case_8,
+    case_2,
+    case_3,
+    case_4,
+    case_5,
+    case_6,
+    case_7,
+    case_8,
     case_9,
 ]
