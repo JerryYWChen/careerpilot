@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from backend.models.analysis import Gap, JobRequirements, ResumeMatchResult, MatchAnalysis, Recommendations, RecommendationReview
+from backend.models.analysis import Gap, JobRequirements, ResumeMatchResult, MatchAnalysis, Recommendations, RecommendationReview, CareerActionPlan
 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
@@ -262,6 +262,80 @@ def review_recommendation(
             },
         ],
         text_format=RecommendationReview,
+    )
+
+    return response.output_parsed
+
+def generate_career_action_plan(
+    gaps: list[Gap],
+    validation_feedback: str | None = None,
+) -> CareerActionPlan:
+
+    gap_text = "\n".join(
+        f"- {gap.area} | status={gap.status.value} | "
+        f"evidence={gap.evidence or 'None'} | reason={gap.reason}"
+        for gap in gaps
+    )
+
+    feedback_text = ""
+
+    if validation_feedback:
+        feedback_text = (
+            "\n\nA previous plan failed validation.\n"
+            f"Validation error: {validation_feedback}\n"
+            "Fix this validation issue in the new plan."
+        )
+
+    response = client.responses.parse(
+        model="gpt-5.6-luna",
+        input=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a career action planning agent. "
+                    "Your job is to turn multiple resume-to-job gaps into a "
+                    "coherent and efficient action plan. "
+
+                    "Look for relationships between gaps and avoid recommending "
+                    "separate projects when one sequence of work can address "
+                    "multiple gaps. "
+
+                    "Prefer the smallest number of realistic actions that address "
+                    "the largest number of important gaps. "
+
+                    "Do not add advanced tools, infrastructure, or implementation "
+                    "complexity unless they are necessary to address the identified gaps. "
+
+                    "Avoid turning a simple learning objective into an unnecessarily "
+                    "production-complex project. "
+
+                    "Prioritize required capabilities and practical dependencies. "
+
+                    "Do not fabricate candidate experience or claim that a short "
+                    "project satisfies years-of-experience requirements. "
+
+                    "Dependencies must reference action titles from the same plan. "
+                    "When filling addresses_gaps, copy the gap names exactly as provided. "
+                    "Do not add labels, status text, explanations, parentheses, or paraphrases."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Create a prioritized career action plan for these gaps:\n\n"
+                    f"{gap_text}\n\n"
+                    "Guidelines:\n"
+                    "- Combine related gaps when practical.\n"
+                    "- Reuse or extend existing evidence when possible.\n"
+                    "- Use priority 1 for the first action, then 2, 3, and so on.\n"
+                    "- Keep dependencies logically ordered.\n"
+                    "- If a gap cannot realistically be solved in the short term, "
+                    "address it honestly instead of pretending it can be closed."
+                    f"{feedback_text}"
+                ),
+            },
+        ],
+        text_format=CareerActionPlan,
     )
 
     return response.output_parsed

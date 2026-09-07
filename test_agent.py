@@ -1,55 +1,36 @@
-# from backend.agents.graph import career_agent
-# from backend.models.analysis import Gap, MatchStatus
-
-
-# # gap = Gap(
-# #     area="AWS",
-# #     status=MatchStatus.PARTIAL,
-# #     evidence="AWS listed in skills section",
-# #     reason="AWS is mentioned, but there is limited project evidence."
-# # )
-
-# gap = Gap(
-#     area="Kubernetes",
-#     status=MatchStatus.MISSING,
-#     evidence=None,
-#     reason="No Kubernetes experience is shown in the resume."
-# )
-
-# state = {
-#     "current_gap": gap,
-#     "action_type": None,
-#     "recommendation": None,
-#     "review_passed": None,
-#     "review_feedback": None,
-#     "retry_count": 0
-# }
-
-# result = career_agent.invoke(state)
-
-# print(result)
-
 from backend.models.analysis import Gap, MatchStatus
-from backend.services.agent_service import generate_agent_actions
-
+from backend.services.planner_service import (
+    create_validated_career_action_plan,
+)
 
 gaps = [
     Gap(
-        area="AWS",
-        status=MatchStatus.PARTIAL,
-        evidence="AWS listed in skills section",
-        reason="AWS is mentioned, but there is limited project evidence.",
+        area="AWS cloud services",
+        status=MatchStatus.MISSING,
+        evidence=None,
+        reason="The resume does not mention AWS."
+    ),
+    Gap(
+        area="Docker",
+        status=MatchStatus.MISSING,
+        evidence=None,
+        reason="The resume does not mention Docker."
     ),
     Gap(
         area="Kubernetes",
         status=MatchStatus.MISSING,
         evidence=None,
-        reason="No Kubernetes experience is shown in the resume.",
+        reason="The resume does not mention Kubernetes."
+    ),
+    Gap(
+        area="Software engineering experience",
+        status=MatchStatus.PARTIAL,
+        evidence="Recent software-oriented projects are shown.",
+        reason="The resume does not establish at least three years of experience."
     ),
 ]
 
+plan = create_validated_career_action_plan(gaps)
 
-actions = generate_agent_actions(gaps)
-
-for action in actions:
-    print(action)
+print("PLAN VALID")
+print(plan)

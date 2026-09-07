@@ -89,3 +89,14 @@ class AgentAction(BaseModel):
     recommendation: str
     review_passed: bool
     retry_count: int
+
+class PlannedAction(BaseModel):
+    title: str
+    description: str
+    addresses_gaps: list[str]
+    priority: int
+    depends_on: list[str]
+
+
+class CareerActionPlan(BaseModel):
+    actions: list[PlannedAction]
