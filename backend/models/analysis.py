@@ -78,3 +78,14 @@ class MatchAnalysis(BaseModel):
 class Recommendations(BaseModel):
     highlight: list[str]
     strengthen: list[str]
+
+class RecommendationReview(BaseModel):
+    passed: bool
+    feedback: str
+
+class AgentAction(BaseModel):
+    gap: str
+    action_type: str
+    recommendation: str
+    review_passed: bool
+    retry_count: int

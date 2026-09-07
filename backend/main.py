@@ -13,7 +13,8 @@ from backend.services.scoring_service import (
     build_match_analysis,
     calculate_match_score,
 )
-
+from backend.models.api import AnalyzeResponse
+from backend.services.agent_service import generate_agent_actions
 
 
 class AnalyzeRequest(BaseModel):
@@ -42,10 +43,32 @@ def get_resume(resume_id: int, db: Session = Depends(get_db)):
     }
 
 @app.post("/resume")
-async def upload_resume(file: UploadFile = File(...), db: Session = Depends(get_db)):
-    content = await file.read()
-    text = extract_text_from_pdf(content)
+async def upload_resume(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF files are supported."
+        )
 
+    content = await file.read()
+
+    try:
+        text = extract_text_from_pdf(content)
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or corrupted PDF file."
+        )
+
+    if not text:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not extract text from the PDF."
+        )
+    
     resume = Resume(
         filename=file.filename,
         file_path=None,
@@ -63,7 +86,7 @@ async def upload_resume(file: UploadFile = File(...), db: Session = Depends(get_
         "text_preview": resume.extracted_text[:500]
     }
 
-@app.post("/resume/{resume_id}/analyze")
+@app.post("/resume/{resume_id}/analyze", response_model=AnalyzeResponse)
 async def analyze_resume(resume_id: int, request: AnalyzeRequest, db: Session = Depends(get_db)):
     resume = db.query(Resume).filter(Resume.id == resume_id).first()
     if resume is None:
@@ -89,6 +112,9 @@ async def analyze_resume(resume_id: int, request: AnalyzeRequest, db: Session = 
         match_result
     )
 
+    agent_actions = generate_agent_actions(
+        match_analysis.gaps
+    )
     recommendations = generate_recommendations(
         resume.extracted_text,
         job_requirements,
@@ -101,5 +127,6 @@ async def analyze_resume(resume_id: int, request: AnalyzeRequest, db: Session = 
     "match_score": match_score,
     "strengths": match_analysis.strengths,
     "gaps": match_analysis.gaps,
-    "recommendations": recommendations
+    "recommendations": recommendations,
+    "agent_actions": agent_actions
     }

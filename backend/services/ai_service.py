@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from backend.models.analysis import JobRequirements, ResumeMatchResult, MatchAnalysis, Recommendations
+from backend.models.analysis import Gap, JobRequirements, ResumeMatchResult, MatchAnalysis, Recommendations, RecommendationReview
 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
@@ -137,6 +137,131 @@ def generate_recommendations(
             },
         ],
         text_format=Recommendations,
+    )
+
+    return response.output_parsed
+
+def generate_resume_improvement(gap: Gap, review_feedback: str | None = None) -> str:
+    prompt = f"""
+You are a resume improvement coach.
+
+The candidate has a partially matched job requirement.
+
+Requirement:
+{gap.area}
+
+Existing resume evidence:
+{gap.evidence or "No specific evidence provided."}
+
+Reason for partial match:
+{gap.reason}
+
+Your task:
+- Give one specific and actionable recommendation for improving how this existing evidence is presented on the resume.
+- Focus on clarifying, reorganizing, or strengthening existing evidence.
+- Do not invent skills, experience, projects, metrics, or achievements.
+- If the existing evidence is not sufficient to support a stronger claim, say what additional real evidence the candidate would need before making that claim.
+- Keep the recommendation concise.
+
+Return only the recommendation.
+"""
+    if review_feedback:
+        prompt += f"""
+
+A previous recommendation did not pass review.
+
+Reviewer feedback:
+{review_feedback}
+
+Generate an improved recommendation that specifically addresses
+the reviewer feedback.
+"""
+
+    response = client.responses.create(
+        model="gpt-5.6-luna",
+        input=prompt,
+    )
+
+    return response.output_text.strip()
+
+def generate_skill_development(
+    gap: Gap,
+    review_feedback: str | None = None
+) -> str:
+    prompt = f"""
+You are a career skill development coach.
+
+The candidate is missing a job requirement.
+
+Requirement:
+{gap.area}
+
+Reason it is considered missing:
+{gap.reason}
+
+Your task:
+- Give one specific and actionable way for the candidate to build real evidence for this missing requirement.
+- Prefer a small hands-on project when practical.
+- Explain what the candidate should build, practice, or learn.
+- Do not assume the candidate already has experience with the missing skill.
+- Do not invent experience, achievements, or qualifications.
+- Keep the recommendation concise and realistic.
+
+Return only the recommendation.
+"""
+
+    if review_feedback:
+        prompt += f"""
+
+A previous recommendation did not pass review.
+
+Reviewer feedback:
+{review_feedback}
+
+Generate an improved recommendation that specifically addresses
+the reviewer feedback.
+"""
+
+    response = client.responses.create(
+        model="gpt-5.6-luna",
+        input=prompt,
+    )
+
+    return response.output_text.strip()
+
+def review_recommendation(
+    gap: Gap,
+    recommendation: str
+) -> RecommendationReview:
+
+    response = client.responses.parse(
+        model="gpt-5.6-luna",
+        input=[
+            {
+                "role": "system",
+                "content": (
+                    "You are reviewing a career recommendation. "
+                    "Evaluate whether it is grounded and actionable. "
+                    "It must not invent or assume candidate experience, "
+                    "skills, projects, achievements, or qualifications. "
+                    "It must provide a specific action rather than vague advice. "
+                    "If it fails, explain specifically what should be improved. "
+                    "If it passes, briefly explain why."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Requirement: {gap.area}\n"
+                    f"Gap status: {gap.status.value}\n"
+                    f"Existing evidence: "
+                    f"{gap.evidence or 'No specific evidence provided.'}\n"
+                    f"Reason for gap: {gap.reason}\n\n"
+                    f"Recommendation:\n{recommendation}"
+                ),
+            },
+        ],
+        text_format=RecommendationReview,
     )
 
     return response.output_parsed
