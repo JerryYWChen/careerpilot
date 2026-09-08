@@ -178,3 +178,15 @@ def test_max_attempts_exhausted_raises_error():
             )
 
     assert mock_generate.call_count == 3
+
+def test_empty_gaps_returns_empty_plan_without_generation():
+    gaps = []
+
+    with patch(
+        "backend.services.planner_service.generate_career_action_plan",
+    ) as mock_generate:
+
+        result = create_validated_career_action_plan(gaps)
+
+    assert result.actions == []
+    mock_generate.assert_not_called()

@@ -6,7 +6,7 @@ from backend.models.resume import Resume
 from backend.services.resume_service import extract_text_from_pdf
 from backend.services.ai_service import (
     analyze_job_description,
-    generate_recommendations,
+    generate_resume_highlights,
     match_resume_to_requirements,
 )
 from backend.services.scoring_service import (
@@ -14,7 +14,9 @@ from backend.services.scoring_service import (
     calculate_match_score,
 )
 from backend.models.api import AnalyzeResponse
-from backend.services.agent_service import generate_agent_actions
+from backend.services.planner_service import (
+    create_validated_career_action_plan,
+)
 
 
 class AnalyzeRequest(BaseModel):
@@ -25,7 +27,7 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 def root():
-    return{"message": "Hello CareerPilot!"}
+    return {"message": "Hello CareerPilot!"}
 
 @app.get("/resume/{resume_id}")
 def get_resume(resume_id: int, db: Session = Depends(get_db)):
@@ -112,21 +114,22 @@ async def analyze_resume(resume_id: int, request: AnalyzeRequest, db: Session = 
         match_result
     )
 
-    agent_actions = generate_agent_actions(
-        match_analysis.gaps
-    )
-    recommendations = generate_recommendations(
+    resume_highlights = generate_resume_highlights(
         resume.extracted_text,
         job_requirements,
         match_analysis
     )
+
+    career_action_plan = create_validated_career_action_plan(
+        match_analysis.gaps
+    )
     return {
-    "resume_id": resume.id,
-    "filename": resume.filename,
-    "job": job_requirements,
-    "match_score": match_score,
-    "strengths": match_analysis.strengths,
-    "gaps": match_analysis.gaps,
-    "recommendations": recommendations,
-    "agent_actions": agent_actions
+        "resume_id": resume.id,
+        "filename": resume.filename,
+        "job": job_requirements,
+        "match_score": match_score,
+        "strengths": match_analysis.strengths,
+        "gaps": match_analysis.gaps,
+        "resume_highlights": resume_highlights,
+        "career_action_plan": career_action_plan,
     }

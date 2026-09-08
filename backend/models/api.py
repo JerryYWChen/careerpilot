@@ -3,9 +3,9 @@ from pydantic import BaseModel
 from backend.models.analysis import (
     Gap,
     JobRequirements,
-    Recommendations,
+    ResumeHighlights,
     Strength,
-    AgentAction,
+    CareerActionPlan,
 )
 
 
@@ -16,5 +16,5 @@ class AnalyzeResponse(BaseModel):
     match_score: float
     strengths: list[Strength]
     gaps: list[Gap]
-    recommendations: Recommendations
-    agent_actions: list[AgentAction]
+    resume_highlights: ResumeHighlights
+    career_action_plan: CareerActionPlan

@@ -75,9 +75,8 @@ class MatchAnalysis(BaseModel):
     strengths: list[Strength]
     gaps: list[Gap]
 
-class Recommendations(BaseModel):
-    highlight: list[str]
-    strengthen: list[str]
+class ResumeHighlights(BaseModel):
+    highlights: list[str]
 
 class RecommendationReview(BaseModel):
     passed: bool

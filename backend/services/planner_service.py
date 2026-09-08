@@ -88,6 +88,9 @@ def create_validated_career_action_plan(
     max_attempts: int = 3,
 ) -> CareerActionPlan:
 
+    if not gaps:
+        return CareerActionPlan(actions=[])
+
     last_error = None
     validation_feedback = None
 

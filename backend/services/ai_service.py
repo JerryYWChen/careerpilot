@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from backend.models.analysis import Gap, JobRequirements, ResumeMatchResult, MatchAnalysis, Recommendations, RecommendationReview, CareerActionPlan
+from backend.models.analysis import Gap, JobRequirements, ResumeMatchResult, MatchAnalysis, ResumeHighlights, RecommendationReview, CareerActionPlan
 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
@@ -98,11 +98,11 @@ def match_resume_to_requirements(
 
     return response.output_parsed
 
-def generate_recommendations(
+def generate_resume_highlights(
     resume_text: str,
     job_requirements: JobRequirements,
-    match_analysis: MatchAnalysis
-) -> Recommendations:
+    match_analysis: MatchAnalysis,
+) -> ResumeHighlights:
 
     response = client.responses.parse(
         model="gpt-5.6-luna",
@@ -110,19 +110,20 @@ def generate_recommendations(
             {
                 "role": "system",
                 "content": (
-                    "Analyze the resume against the provided job requirements "
-                    "and match analysis. "
-                    "For matched requirements, recommend how the candidate "
-                    "can highlight the relevant experience or evidence in "
-                    "the resume. "
-                    "For partial requirements, recommend how the candidate "
-                    "can strengthen the existing evidence or clarify the "
-                    "experience in the resume. "
-                    "For missing requirements, recommend learning the skill "
-                    "or building a small project to gain relevant experience. "
-                    "Do not ask the candidate to add skills, experience, "
-                    "or achievements that are not supported by the resume. "
-                    "Never fabricate or exaggerate candidate experience."
+                    "You are a resume presentation advisor. "
+                    "Recommend how the candidate can better highlight "
+                    "existing strengths that are already supported by the resume. "
+
+                    "Focus only on matched requirements and existing evidence. "
+                    "Suggest clearer positioning, wording, organization, or emphasis. "
+
+                    "Do not recommend learning missing skills or building new projects. "
+                    "Do not provide gap-closing actions. "
+                    "Do not invent or exaggerate skills, experience, metrics, "
+                    "achievements, or qualifications. "
+
+                    "Every recommendation must be grounded in evidence already "
+                    "present in the resume."
                 ),
             },
             {
@@ -131,12 +132,12 @@ def generate_recommendations(
                     f"Resume:\n{resume_text}\n\n"
                     f"Job requirements:\n"
                     f"{job_requirements.model_dump_json()}\n\n"
-                    f"Match analysis:\n"
-                    f"{match_analysis.model_dump_json()}"
+                    f"Matched strengths:\n"
+                    f"{[strength.model_dump() for strength in match_analysis.strengths]}"
                 ),
             },
         ],
-        text_format=Recommendations,
+        text_format=ResumeHighlights,
     )
 
     return response.output_parsed
