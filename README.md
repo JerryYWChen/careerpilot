@@ -1,107 +1,150 @@
 # CareerPilot
 
-CareerPilot is an AI-powered career assistant that analyzes resumes against job descriptions, identifies strengths and requirement gaps, and generates grounded, actionable career recommendations.
+CareerPilot is an AI-powered career analysis and planning application that compares a resume against a job description, identifies strengths and requirement gaps, and turns those gaps into a prioritized career action plan.
 
-Rather than asking a language model to directly produce an arbitrary match score or generic advice, CareerPilot combines:
+Instead of asking a language model to directly generate an arbitrary match score or generic career advice, CareerPilot combines semantic AI reasoning with deterministic application logic:
 
 - Structured LLM outputs
 - Evidence-based resume matching
 - Deterministic Python scoring
-- Human-defined evaluation cases
-- LangGraph-based agentic workflows
-- Specialized recommendation agents
-- LLM review and reflection
+- Cross-gap career planning
+- Deterministic plan validation
 - Feedback-driven bounded retries
+- Human-defined evaluation cases
+- Automated planner tests
+- FastAPI backend
+- React + TypeScript frontend in development
 
 The project is currently under active development.
 
 ---
 
-## Current Features
+## What CareerPilot Does
 
-### Resume & Job Analysis
+CareerPilot is designed around five primary user-facing outputs:
 
-- Upload resumes as PDF files
+```text
+Job Title
+    ↓
+Match Score
+    ↓
+Strengths
+    ↓
+Gaps
+    ↓
+Career Action Plan
+```
+
+The goal is not only to tell a candidate how well a resume matches a role, but also to explain the evidence behind that assessment and provide realistic next steps for improving their fit.
+
+---
+
+# Current Features
+
+## Resume & Job Analysis
+
+- Upload PDF resumes
 - Extract resume text with `pypdf`
 - Store resume metadata and extracted text using SQLite and SQLAlchemy
 - Retrieve stored resumes by ID
-- Parse job descriptions into structured requirements using AI
-- Validate AI-generated structured data with Pydantic
+- Parse job descriptions into structured requirements using an LLM
+- Validate structured AI outputs with Pydantic
 - Match resume evidence against individual job requirements
-- Support direct and contextual evidence
 - Classify requirements as `matched`, `partial`, or `missing`
-- Track resume sections providing evidence for each requirement
-- Generate evidence-based explanations for match decisions
-- Calculate deterministic weighted resume-to-job match scores
-- Identify strengths and requirement gaps
+- Track resume sections providing evidence
+- Generate evidence-based explanations
+- Calculate deterministic weighted match scores
+- Convert requirement matches into strengths and gaps
 
-### Agentic Career Recommendations
+## Career Action Planning
 
-- Route different gap types to specialized recommendation workflows
-- Send partial matches to a Resume Improvement agent
-- Send missing requirements to a Skill Development agent
-- Generate grounded, actionable recommendations
-- Review generated recommendations with an LLM reviewer
-- Detect recommendations that are vague or unsupported
-- Store reviewer feedback in shared agent state
-- Retry failed recommendations using reviewer feedback
-- Limit retries to prevent uncontrolled agent loops
-- Process multiple gaps through the agent workflow
-- Return reviewed agent actions through the analysis API
+- Generate a prioritized action plan from multiple resume-to-job gaps
+- Combine related gaps into shared actions when practical
+- Reuse and extend existing candidate evidence when possible
+- Represent dependencies between actions
+- Distinguish short-term actionable gaps from long-term requirements
+- Avoid treating projects as substitutes for unsupported years-of-experience requirements
+- Validate generated plans with deterministic Python rules
+- Feed validation errors back into the planner
+- Retry invalid plans with bounded attempts
 
-### AI Evaluation
+## Evaluation & Testing
 
-- Evaluate matcher behavior against human-defined expected results
-- Evaluate evidence-source attribution
-- Run repeated evaluation cases to measure consistency
-- Detect prompt and matching regressions
-- Log detailed failure information for debugging
-- Preserve difficult contextual-evidence boundary cases
+- Human-defined matcher evaluation cases
+- Repeated matcher consistency evaluation
+- Evidence-source attribution evaluation
+- Failure diagnostics for prompt and matching regressions
+- Automated planner validation tests
+- Automated feedback-retry tests
+- Empty-gap behavior testing
 
-### API
+## Frontend
 
-- REST API built with FastAPI
-- Pydantic request and response schemas
-- Interactive API testing through Swagger UI
-- End-to-end resume analysis through `/resume/{resume_id}/analyze`
+A React + TypeScript frontend is currently under development.
+
+Current frontend foundation:
+
+- React
+- TypeScript
+- Vite
+- Controlled form state
+- Job-description input
+
+The primary result interface is being designed around:
+
+```text
+Job Title / Match Score / Strengths / Gaps / Action Plan
+```
 
 ---
 
 # Architecture
 
-CareerPilot separates semantic AI reasoning from deterministic application logic and agent orchestration.
+CareerPilot separates semantic AI reasoning from deterministic application rules.
 
 ```text
-Resume PDF                     Job Description
-    │                                │
-    ↓                                ↓
-Text Extraction              Requirement Extraction
-    │                                │
-    └──────────────┬─────────────────┘
-                   ↓
-          Evidence-Based Matcher
-                   ↓
-           ResumeMatchResult
-                   ↓
-        ┌──────────┴──────────┐
-        ↓                     ↓
-Deterministic Scoring    Match Analysis
-        ↓                     │
-   Match Score          ┌─────┴─────┐
-                        ↓           ↓
-                    Strengths      Gaps
-                                      │
-                                      ↓
-                               Agent Service
-                                      ↓
-                              LangGraph Workflow
-                                      ↓
-                                Agent Actions
+Resume PDF                         Job Description
+    │                                    │
+    ↓                                    ↓
+Text Extraction                Requirement Extraction
+    │                                    │
+    └─────────────────┬──────────────────┘
+                      ↓
+             Evidence-Based Matcher
+                      ↓
+               ResumeMatchResult
+                      ↓
+          ┌───────────┴───────────┐
+          ↓                       ↓
+ Deterministic Scoring       Match Analysis
+          ↓                       │
+     Match Score              ┌────┴────┐
+                              ↓         ↓
+                         Strengths     Gaps
+                                        │
+                                        ↓
+                                  Career Planner
+                                        ↓
+                              Structured Action Plan
+                                        ↓
+                           Deterministic Validation
+                                  ↙           ↘
+                               Valid         Invalid
+                                 ↓              ↓
+                              Return      Validation Error
+                                                ↓
+                                         Planner Feedback
+                                                ↓
+                                            Regenerate
 ```
+
+The architecture follows a central principle:
+
+> Use AI for semantic reasoning and generation; use deterministic code for rules that the application already knows.
 
 ---
 
-## Resume Pipeline
+# Resume Pipeline
 
 ```text
 PDF Upload
@@ -119,9 +162,11 @@ SQLAlchemy ORM
 SQLite Database
 ```
 
+The API validates that uploaded files are PDFs and rejects files that cannot produce usable text.
+
 ---
 
-## Job Description Pipeline
+# Job Description Pipeline
 
 ```text
 Job Description
@@ -146,7 +191,7 @@ Structured requirements include:
 
 ---
 
-## Resume Matching Pipeline
+# Resume Matching
 
 ```text
 Resume Text
@@ -166,61 +211,9 @@ RequirementMatch
 └── reason
 ```
 
-The language model performs semantic evidence analysis rather than simple keyword matching.
+The matcher performs semantic evidence analysis rather than simple keyword matching.
 
-Evidence may come from:
-
-- Skills
-- Work experience
-- Projects
-- Research
-- Education
-- Certifications
-- Related technologies and frameworks
-- Concrete implementation details
-
-The matcher considers the total strength of available evidence and supports both direct and contextual evidence.
-
----
-
-# Matching Logic
-
-Each job requirement is classified into one of three states.
-
-## Matched
-
-The resume provides direct evidence or sufficiently strong contextual evidence supporting the requirement.
-
-Examples:
-
-- Concrete use of a technology in a project or work experience
-- Multiple related technologies combined with implementation evidence
-- Framework and implementation context that reliably establishes a broader technical capability
-
-## Partial
-
-Relevant evidence exists, but it is incomplete, indirect, or insufficient to fully satisfy the requirement.
-
-Examples:
-
-- A skill appears only in the Skills section
-- Related evidence exists but does not reliably establish the exact requirement
-- Relevant experience exists but does not satisfy a required duration
-- The resume does not clearly establish the requested number of years
-
-## Missing
-
-The resume provides no reasonable evidence supporting the requirement.
-
-CareerPilot is instructed not to infer skills merely from broadly related coursework, fields of study, or weakly related technologies.
-
----
-
-# Evidence Sources
-
-CareerPilot tracks where supporting evidence comes from separately from whether that evidence is sufficient.
-
-Current evidence sources:
+Evidence can come from:
 
 ```text
 skills
@@ -231,6 +224,47 @@ education
 certifications
 ```
 
+The original job requirements remain the source of truth.
+
+---
+
+# Matching Logic
+
+Each job requirement is classified into one of three states.
+
+## Matched
+
+The resume provides sufficient evidence supporting the requirement.
+
+Examples include:
+
+- Concrete use of a technology in a project or work experience
+- Direct skill evidence supported by implementation evidence
+- Strong contextual evidence that reliably establishes the capability
+
+## Partial
+
+Relevant evidence exists, but it does not fully satisfy the requirement.
+
+Examples include:
+
+- A skill appears with limited supporting evidence
+- Related implementation evidence exists but does not fully establish the requirement
+- Relevant experience exists but does not satisfy a stated duration
+- The resume does not clearly establish the requested number of years
+
+## Missing
+
+The resume provides no reasonable evidence supporting the requirement.
+
+CareerPilot is designed to avoid inferring unsupported skills from broadly related coursework, fields of study, or weakly related technologies.
+
+---
+
+# Evidence Sources
+
+CareerPilot tracks where supporting evidence comes from separately from whether that evidence is sufficient.
+
 For example:
 
 ```text
@@ -238,14 +272,14 @@ Python
 ├── status: matched
 ├── evidence_sources
 │   ├── skills
-│   └── experience
+│   └── projects
 ├── evidence
-│   └── Python is listed and demonstrated in backend development.
+│   └── Python is listed and demonstrated through implementation.
 └── reason
-    └── Direct skill evidence is supported by implementation experience.
+    └── Explicit skill evidence is supported by hands-on development.
 ```
 
-This separates two different questions:
+This separates two questions:
 
 ```text
 Where did the evidence come from?
@@ -254,7 +288,7 @@ Where did the evidence come from?
 from:
 
 ```text
-Is that evidence sufficient to satisfy the requirement?
+Is the evidence sufficient to satisfy the requirement?
 ```
 
 ---
@@ -263,7 +297,7 @@ Is that evidence sufficient to satisfy the requirement?
 
 CareerPilot does not ask the LLM to generate a match percentage.
 
-The model produces structured requirement matches, and Python calculates the final score deterministically.
+The model produces structured requirement matches, while Python calculates the final score deterministically.
 
 Current match values:
 
@@ -288,15 +322,13 @@ sum(match value × requirement weight)
         sum(requirement weights)
 ```
 
-The original job requirements remain the source of truth.
-
-Every requirement must have a corresponding match result. Missing results raise an error instead of silently increasing the score.
+Every job requirement must have a corresponding match result. Missing results raise an error rather than silently changing the score.
 
 ---
 
 # Strengths and Gaps
 
-Structured matches are converted into user-facing analysis using deterministic Python logic.
+Structured requirement matches are converted into product-level analysis using deterministic Python logic.
 
 ```text
 MATCHED
@@ -306,7 +338,7 @@ Strength
 PARTIAL
    ↓
 Gap
-(existing evidence needs strengthening)
+(existing evidence is insufficient)
 
 MISSING
    ↓
@@ -314,265 +346,165 @@ Gap
 (no supporting evidence)
 ```
 
-A `Gap` retains its status so downstream systems can distinguish between:
-
-- Evidence that already exists but needs stronger presentation
-- A genuinely unsupported requirement
-
-This distinction is also used by the agentic recommendation workflow.
+A `Gap` retains its original match status so downstream systems can distinguish partial evidence from a genuinely missing capability.
 
 ---
 
-# Agentic Recommendation Workflow
+# Career Action Planner
 
-CareerPilot uses LangGraph to turn identified gaps into reviewed, actionable next steps.
+The Career Planner operates across the complete set of gaps rather than generating one isolated recommendation for every requirement.
 
-Each gap is processed independently through a stateful workflow.
-
-```text
-                     ┌── Resume Improvement ──┐
-                     │       PARTIAL           │
-Gap → Route Gap ─────┤                         ├──→ Reviewer
-                     │       MISSING           │       │
-                     └── Skill Development ────┘       ↓
-                                                    Pass?
-                                                   ↙     ↘
-                                                 Yes      No
-                                                  ↓        ↓
-                                                 END    Feedback
-                                                           ↓
-                                                      Retry Count
-                                                           ↓
-                                                       Regenerate
-```
-
-## Gap Routing
-
-Routing is deterministic.
+This allows CareerPilot to recognize relationships such as:
 
 ```text
-PARTIAL
-    ↓
-resume_improvement
-
-MISSING
-    ↓
-skill_development
+Docker ───────┐
+              │
+AWS ──────────┼──→ Deploy one containerized application
+              │
+Kubernetes ───┘
 ```
 
-The LLM is not used for routing when the business rule is already known.
+instead of automatically recommending three unrelated projects.
 
-### Resume Improvement Agent
+A generated plan uses the following structure:
 
-Used for `partial` requirements.
+```text
+CareerActionPlan
+└── actions[]
+    ├── title
+    ├── description
+    ├── addresses_gaps[]
+    ├── priority
+    └── depends_on[]
+```
 
-The agent focuses on improving how existing evidence is presented without inventing new experience.
+This allows the planner to represent:
+
+- One action addressing multiple gaps
+- Multiple actions contributing to one gap
+- Priority ordering
+- Dependencies between actions
+- Short-term and long-term improvements
+
+The planner is instructed to prefer the smallest number of realistic actions that address the largest number of relevant gaps.
+
+It also avoids introducing unnecessary infrastructure or implementation complexity when a simpler learning objective would be sufficient.
+
+---
+
+# Deterministic Plan Validation
+
+A valid Pydantic object is not automatically considered a valid career plan.
+
+Pydantic validates the output structure, while deterministic Python logic validates application-level planning constraints.
+
+Current validation rules include:
+
+```text
+✓ Action titles must be unique
+
+✓ Priorities must be sequential
+
+✓ addresses_gaps must reference real input gaps
+
+✓ depends_on must reference real actions
+
+✓ Every input gap must be addressed
+
+✓ Dependency graphs must not contain cycles
+```
+
+For example, this is structurally valid JSON:
+
+```text
+addresses_gaps = ["Docker (missing)"]
+```
+
+but it is rejected if the original gap is named:
+
+```text
+Docker
+```
+
+This prevents generated plans from silently modifying application identifiers.
+
+---
+
+# Feedback-Driven Plan Repair
+
+When a generated plan fails deterministic validation, CareerPilot uses the validation error as feedback for another planning attempt.
+
+```text
+Generate Plan
+     ↓
+Validate
+     ↓
+   FAIL
+     ↓
+Validation Error
+     ↓
+Planner Feedback
+     ↓
+Regenerate
+     ↓
+Validate Again
+```
 
 For example:
 
 ```text
-AWS is listed in Skills
-but has weak supporting evidence
-        ↓
-Resume Improvement
-        ↓
-Clarify real AWS usage in a project or experience,
-if such evidence actually exists
+Unknown gap 'Docker (missing)' in action 'Learn Docker'.
 ```
 
-### Skill Development Agent
+is passed back to the planner so the next attempt can repair the exact validation failure.
 
-Used for `missing` requirements.
+Retries are bounded to prevent uncontrolled generation loops.
 
-Instead of telling the candidate to add an unsupported skill to the resume, the agent proposes a concrete way to build real evidence.
-
-For example:
+The current default is:
 
 ```text
-Kubernetes = missing
-        ↓
-Skill Development
-        ↓
-Build a small Kubernetes deployment
-        ↓
-Document it as portfolio evidence
+Maximum attempts: 3
 ```
+
+If all attempts fail, the service raises an explicit error instead of returning an invalid plan.
+
+If there are no gaps, the planner immediately returns an empty action plan without making an unnecessary LLM call.
 
 ---
 
-# Review and Reflection
+# Planner Testing
 
-Generated actions are evaluated by a separate reviewer.
+Planner orchestration and validation behavior are covered with automated `pytest` tests.
 
-The reviewer checks two primary properties:
-
-### Grounded
-
-The recommendation must not invent or assume:
-
-- Skills
-- Experience
-- Projects
-- Achievements
-- Qualifications
-
-### Actionable
-
-The recommendation must provide a specific next action rather than vague advice.
-
-The reviewer returns structured output:
+Current tests verify:
 
 ```text
-RecommendationReview
-├── passed
-└── feedback
+✓ Valid plans return without retry
+
+✓ Invalid plans trigger regeneration
+
+✓ Validation feedback reaches the next attempt
+
+✓ Maximum retry attempts are enforced
+
+✓ Empty gaps return an empty plan without generation
 ```
 
-The result is stored in the shared LangGraph state.
-
----
-
-## Feedback-Driven Retry
-
-If a recommendation fails review, CareerPilot does not simply repeat the same generation step.
-
-Reviewer feedback is stored in agent state and passed back to the appropriate generator.
+Current planner test result:
 
 ```text
-Generate
-    ↓
-Review
-    ↓
-FAIL
-    ↓
-Reviewer Feedback
-    ↓
-Agent State
-    ↓
-Retry
-    ↓
-Generator reads feedback
-    ↓
-Revised Recommendation
-    ↓
-Review Again
+5 / 5 tests passing
 ```
 
-Retries are bounded to prevent uncontrolled loops.
-
-Current maximum:
-
-```text
-2 retries
-```
-
-This means one initial generation plus at most two revisions.
-
----
-
-# Agent State
-
-LangGraph nodes communicate through a shared state.
-
-```text
-CareerAgentState
-├── current_gap
-├── action_type
-├── recommendation
-├── review_passed
-├── review_feedback
-└── retry_count
-```
-
-The state allows different nodes to share workflow progress without tightly coupling their implementations.
-
-For example:
-
-```text
-Reviewer
-    ↓
-review_feedback stored in State
-    ↓
-Retry routing
-    ↓
-Generator reads review_feedback
-```
-
----
-
-# Agent Service Layer
-
-The LangGraph workflow operates on one gap at a time.
-
-CareerPilot's agent service adapts this workflow to real resume analyses containing multiple gaps.
-
-```text
-MatchAnalysis.gaps
-        ↓
-generate_agent_actions()
-        ↓
-┌─────────────────────────────┐
-│ Gap 1 → Career Agent        │
-│ Gap 2 → Career Agent        │
-│ Gap 3 → Career Agent        │
-└─────────────────────────────┘
-        ↓
-list[AgentAction]
-```
-
-Each gap receives an independent agent state so retries and reviewer feedback do not leak between requirements.
-
-An `AgentAction` contains:
-
-```text
-AgentAction
-├── gap
-├── action_type
-├── recommendation
-├── review_passed
-└── retry_count
-```
-
----
-
-# AI Recommendations
-
-CareerPilot currently also retains its original high-level recommendation generator.
-
-It produces:
-
-```text
-Recommendations
-├── highlight[]
-└── strengthen[]
-```
-
-`highlight` focuses on making existing strengths more visible.
-
-`strengthen` focuses on partial and missing requirements.
-
-The newer `agent_actions` workflow adds requirement-level routing, review, reflection, and retry.
-
-These systems are currently kept separate while the agentic recommendation architecture is evaluated and refined.
+The tests mock LLM generation so planner control flow can be tested deterministically without depending on model behavior.
 
 ---
 
 # AI Matching Evaluation
 
-CareerPilot includes a repeatable evaluation suite for testing resume matching behavior against human-defined ground truth.
+CareerPilot includes a repeatable evaluation suite for testing resume matching behavior against human-defined expected results.
 
-Each case contains:
-
-```text
-MatchingEvalCase
-├── name
-├── resume_text
-├── job_requirements
-└── expected_matches
-    └── ExpectedMatch
-        ├── status
-        └── evidence_sources
-```
+Each evaluation case contains expected requirement statuses and evidence sources.
 
 The evaluator tests:
 
@@ -583,7 +515,7 @@ The evaluator tests:
 - Repeated model consistency
 - Prompt regressions
 
-When a run fails, diagnostics can include:
+Failures include diagnostic information such as:
 
 ```text
 Requirement
@@ -595,27 +527,11 @@ Selected evidence
 Model reasoning
 ```
 
-This makes failures inspectable before prompts, schemas, or product rules are changed.
+This makes failures inspectable before prompts, schemas, or business rules are changed.
 
----
+## Matcher v1 Baseline
 
-## Current Evaluation Coverage
-
-The active suite includes nine cases covering:
-
-- Mixed matched, partial, and missing evidence
-- Minimum years of experience
-- Strong direct implementation evidence
-- Completely missing evidence
-- Insufficient contextual evidence
-- Framework-to-language contextual evidence
-- Backend framework-to-language evidence
-- Concrete tools supporting broader concepts
-- Explicit skills combined with contextual evidence
-
-Cases are executed repeatedly to measure consistency.
-
-### Current Matcher v1 Baseline
+The current frozen matcher baseline is:
 
 ```text
 Active evaluation cases: 9
@@ -625,57 +541,39 @@ Passing runs: 25
 Overall run accuracy: 92.6%
 ```
 
-The remaining failures are retained as known contextual-evidence boundary cases rather than being removed or overfit through prompt changes.
+Known contextual-evidence boundary cases are intentionally retained rather than removed or overfit through prompt changes.
 
-This result represents performance on the current human-defined evaluation suite only. It should not be interpreted as general accuracy across arbitrary resumes and job descriptions.
+This result measures performance only on the current human-defined evaluation suite and should not be interpreted as general accuracy across arbitrary resumes and job descriptions.
 
 ---
 
-# Tech Stack
+# Experimental Agent Workflow
 
-## Backend
+Earlier versions of CareerPilot explored per-gap recommendation generation using LangGraph.
 
-- Python
-- FastAPI
-- Uvicorn
-- Pydantic
+The workflow includes:
 
-## Agent Orchestration
+```text
+Gap
+ ↓
+Deterministic Routing
+ ├── PARTIAL → Resume Improvement
+ └── MISSING → Skill Development
+ ↓
+Recommendation
+ ↓
+Reviewer
+ ↓
+Feedback
+ ↓
+Bounded Retry
+```
 
-- LangGraph
-- Stateful workflow routing
-- Conditional edges
-- LLM review and reflection
-- Feedback-driven bounded retries
+The workflow uses shared state to coordinate generation, review, feedback, and retry behavior.
 
-## AI
+This implementation remains in the codebase as an experimental agent architecture.
 
-- OpenAI API
-- Structured Outputs
-- Pydantic-based response validation
-- Evidence-based semantic matching
-- Specialized recommendation generation
-
-## Database
-
-- SQLite
-- SQLAlchemy
-
-## Document Processing
-
-- pypdf
-
-## Evaluation
-
-- Human-defined ground truth
-- Requirement classification evaluation
-- Evidence-source evaluation
-- Repeated consistency testing
-- Failure diagnostics
-
-## Frontend
-
-- TBD
+The primary product flow has since evolved toward cross-gap planning, where one coordinated action can address multiple related requirements.
 
 ---
 
@@ -724,21 +622,18 @@ A nonexistent resume returns:
 POST /resume/{resume_id}/analyze
 ```
 
-Runs the complete CareerPilot analysis and agent workflow.
-
-The endpoint:
+The endpoint currently:
 
 1. Retrieves the stored resume
 2. Extracts structured job requirements
-3. Matches resume evidence against every requirement
-4. Classifies each requirement
-5. Calculates a deterministic match score
-6. Builds strengths and gaps
-7. Sends gaps through the LangGraph agent workflow
-8. Generates specialized actions
-9. Reviews recommendations
-10. Retries failed recommendations with reviewer feedback
-11. Returns the complete structured analysis
+3. Matches resume evidence against each requirement
+4. Calculates a deterministic match score
+5. Builds strengths and gaps
+6. Generates resume highlights
+7. Generates a cross-gap career action plan
+8. Validates the action plan
+9. Retries invalid plans using validation feedback
+10. Returns the structured analysis
 
 Example request:
 
@@ -748,7 +643,7 @@ Example request:
 }
 ```
 
-Example response structure:
+Simplified response structure:
 
 ```json
 {
@@ -763,34 +658,40 @@ Example response structure:
   "match_score": 54.29,
   "strengths": [],
   "gaps": [],
-  "recommendations": {
-    "highlight": [],
-    "strengthen": []
+  "resume_highlights": {
+    "highlights": []
   },
-  "agent_actions": [
-    {
-      "gap": "Kubernetes",
-      "action_type": "skill_development",
-      "recommendation": "Build and deploy a small containerized application to a local Kubernetes cluster...",
-      "review_passed": true,
-      "retry_count": 0
-    },
-    {
-      "gap": "Software engineering experience",
-      "action_type": "resume_improvement",
-      "recommendation": "Clarify the dates and implementation responsibilities of existing software projects...",
-      "review_passed": true,
-      "retry_count": 0
-    }
-  ]
+  "career_action_plan": {
+    "actions": [
+      {
+        "title": "...",
+        "description": "...",
+        "addresses_gaps": [],
+        "priority": 1,
+        "depends_on": []
+      }
+    ]
+  }
 }
 ```
+
+The primary product interface will focus on:
+
+```text
+Job Title
+Match Score
+Strengths
+Gaps
+Career Action Plan
+```
+
+Resume highlights are retained as a backend capability but are not currently planned as a primary result-page section.
 
 ---
 
 # Core Schemas
 
-## Job Requirement
+## Job Requirements
 
 ```text
 JobRequirements
@@ -832,24 +733,61 @@ MatchAnalysis
     └── reason
 ```
 
-## Agent Review
+## Career Action Plan
 
 ```text
-RecommendationReview
-├── passed
-└── feedback
+CareerActionPlan
+└── actions[]
+    ├── title
+    ├── description
+    ├── addresses_gaps[]
+    ├── priority
+    └── depends_on[]
 ```
 
-## Agent Action
+---
 
-```text
-AgentAction
-├── gap
-├── action_type
-├── recommendation
-├── review_passed
-└── retry_count
-```
+# Tech Stack
+
+## Frontend
+
+- React
+- TypeScript
+- Vite
+
+## Backend
+
+- Python
+- FastAPI
+- Uvicorn
+- Pydantic
+
+## AI & Agentic Systems
+
+- OpenAI API
+- Structured Outputs
+- Evidence-based semantic matching
+- Cross-gap planning
+- LangGraph
+- Feedback-driven generation and repair
+
+## Database
+
+- SQLite
+- SQLAlchemy
+
+## Document Processing
+
+- pypdf
+
+## Testing & Evaluation
+
+- pytest
+- Human-defined matching ground truth
+- Repeated matcher consistency evaluation
+- Evidence-source evaluation
+- Deterministic planner tests
+- Failure diagnostics
 
 ---
 
@@ -880,9 +818,25 @@ careerpilot/
 │   │   ├── resume_service.py
 │   │   ├── ai_service.py
 │   │   ├── scoring_service.py
-│   │   └── agent_service.py
+│   │   ├── agent_service.py
+│   │   └── planner_service.py
 │   │
 │   └── main.py
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── App.css
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   └── main.tsx
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── vite.config.ts
+│
+├── tests/
+│   └── test_planner_service.py
 │
 ├── test_agent.py
 ├── .gitignore
@@ -901,6 +855,7 @@ Local secrets such as API credentials are stored in `.env`, which is excluded fr
 - [x] Swagger API documentation
 - [x] Environment-based secret configuration
 - [x] SQLite persistence
+- [x] SQLAlchemy ORM
 - [x] Pydantic request and response models
 
 ## Resume Pipeline
@@ -917,87 +872,109 @@ Local secrets such as API credentials are stored in `.env`, which is excluded fr
 
 - [x] Structured job requirement extraction
 - [x] Evidence-based resume matching
-- [x] Direct and contextual evidence support
 - [x] Matched / partial / missing classification
 - [x] Evidence-source tracking
 - [x] Evidence-based explanations
 - [x] Deterministic weighted scoring
 - [x] Strength and gap generation
-- [x] Grounded high-level recommendations
+- [x] Establish Matcher v1 baseline
 
-## Agentic Workflow
+## Career Planning
 
-- [x] Add LangGraph
-- [x] Define shared CareerAgentState
-- [x] Add deterministic gap routing
-- [x] Add Resume Improvement agent
-- [x] Add Skill Development agent
-- [x] Add structured recommendation reviewer
-- [x] Store reviewer feedback in agent state
-- [x] Add conditional retry routing
-- [x] Add bounded retry count
-- [x] Add feedback-driven recommendation revision
-- [x] Process multiple gaps through agent service
-- [x] Expose agent actions through `/analyze`
-- [x] Complete end-to-end API integration test
+- [x] Cross-gap career planning
+- [x] Multi-gap actions
+- [x] Action prioritization
+- [x] Action dependencies
+- [x] Structured `CareerActionPlan`
+- [x] Deterministic plan validation
+- [x] Unknown-gap validation
+- [x] Dependency validation
+- [x] Complete gap coverage validation
+- [x] Circular dependency detection
+- [x] Feedback-driven retry
+- [x] Bounded generation attempts
+- [x] Empty-gap optimization
+- [x] End-to-end API integration
 
-## AI Evaluation
+## Testing & Evaluation
 
-- [x] Human-defined matching evaluation cases
+- [x] Human-defined matcher evaluation cases
 - [x] Status evaluation
 - [x] Evidence-source evaluation
 - [x] Repeated consistency evaluation
 - [x] Failure diagnostics
-- [x] Establish Matcher v1 baseline
-- [x] Preserve known contextual boundary cases
-- [ ] Expand coverage with real-world failures
-- [ ] Track evaluation results across matcher versions
-- [ ] Add evaluation coverage for agent recommendations
+- [x] Matcher v1 baseline: 25/27 passing runs
+- [x] Planner automated tests: 5/5 passing
+- [x] Planner retry behavior tests
+- [x] Validation-feedback propagation test
+- [ ] Expand matcher coverage with real-world failures
+- [ ] Add planner-quality evaluation cases
 
-## Planned
+## Frontend
 
-- [ ] Define final relationship between high-level recommendations and agent actions
-- [ ] Add automated tests for agent routing and retry behavior
-- [ ] Add agent recommendation evaluation
-- [ ] Improve request validation and application logging
-- [ ] Add recommendation prioritization
-- [ ] Generate interview questions from job gaps
-- [ ] Add mock interview feedback
-- [ ] Build frontend application
+- [x] Initialize React + TypeScript + Vite application
+- [x] Remove default Vite application shell
+- [x] Add initial CareerPilot application shell
+- [x] Add controlled job-description input
+- [ ] Add resume upload interface
+- [ ] Connect frontend to FastAPI
+- [ ] Add loading and error states
+- [ ] Build analysis result page
+- [ ] Add expandable strength and gap evidence
+- [ ] Add action-plan details
+
+## Future
+
+- [ ] Persist completed analyses
+- [ ] Add analysis history
+- [ ] Add frontend/API integration tests
+- [ ] Improve application logging and error handling
+- [ ] Add interview preparation workflows
 - [ ] Add user authentication
+- [ ] Containerize application
 - [ ] Deploy to production
 
 ---
 
 # Design Principles
 
-CareerPilot follows several design principles:
+**Structured outputs over free-form parsing**
 
-**Structured outputs over free-form parsing**  
 Important AI outputs are validated with Pydantic whenever possible.
 
-**AI for semantic reasoning, Python for deterministic rules**  
-LLMs interpret evidence and generate recommendations. Scoring, routing, retry limits, and other known business rules remain deterministic.
+**AI for semantic reasoning, Python for deterministic rules**
 
-**Evidence before claims**  
-CareerPilot should never encourage candidates to fabricate experience. Missing skills should result in learning or project actions rather than unsupported resume claims.
+LLMs interpret resume evidence and generate plans. Scoring, validation, dependency checks, retry limits, and other known business rules remain deterministic.
 
-**Evaluation before prompt overfitting**  
-Known model inconsistencies are measured through regression cases instead of immediately modifying prompts to fit individual examples.
+**Evidence before claims**
 
-**Agent state for workflow coordination**  
-Generation, review, feedback, routing, and retries communicate through explicit shared state.
+CareerPilot should never encourage candidates to fabricate experience. Missing capabilities should result in learning, project, or long-term experience actions rather than unsupported resume claims.
 
-**Bounded autonomy**  
-Agent retries are limited and controlled rather than allowing unconstrained loops.
+**Plan across gaps, not only within gaps**
+
+Related requirements should be considered together. One coherent project may be more useful than several isolated recommendations.
+
+**Validate before trusting generated plans**
+
+A response satisfying the Pydantic schema may still violate product rules. Generated plans therefore pass through deterministic semantic validation.
+
+**Feedback before blind retry**
+
+When generation fails validation, the next attempt receives the actual validation error instead of blindly repeating the same prompt.
+
+**Evaluation before prompt overfitting**
+
+Known model inconsistencies are measured through regression cases rather than immediately changing prompts to fit individual examples.
+
+**Bounded autonomy**
+
+AI retries are explicitly limited to prevent uncontrolled loops.
 
 ---
 
 # Status
 
-CareerPilot's core backend and agentic resume-analysis workflow are functional end-to-end.
-
-The system can currently:
+CareerPilot currently has a functional end-to-end backend for resume analysis and career action planning.
 
 ```text
 Upload Resume
@@ -1012,17 +989,38 @@ Calculate Deterministic Score
     ↓
 Identify Strengths & Gaps
     ↓
-Route Gaps to Specialized Agents
+Generate Cross-Gap Career Plan
     ↓
-Generate Actions
+Validate Plan
     ↓
-Review Recommendations
-    ↓
-Reflect & Retry When Needed
+Repair Invalid Plans
     ↓
 Return Structured API Response
 ```
 
-Matcher v1 is currently frozen while the surrounding product architecture is developed. Its current regression baseline is **25/27 passing runs (92.6%)** on nine human-defined evaluation cases executed three times each.
+Matcher v1 is currently frozen while the surrounding product architecture is developed.
 
-The next development focus is refining the relationship between the original recommendation system and the newer agentic actions, adding agent-level evaluation and automated workflow tests, and continuing toward a user-facing frontend.
+Current regression baseline:
+
+```text
+25 / 27 passing matcher runs
+92.6% on the current evaluation suite
+```
+
+Planner control-flow tests:
+
+```text
+5 / 5 passing
+```
+
+Frontend development has started with React, TypeScript, and Vite.
+
+The current product focus is building a clean user interface around five core outputs:
+
+```text
+Job Title
+Match Score
+Strengths
+Gaps
+Career Action Plan
+```
