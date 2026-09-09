@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from backend.database.database import Base, engine, get_db
@@ -18,11 +19,18 @@ from backend.services.planner_service import (
     create_validated_career_action_plan,
 )
 
-
 class AnalyzeRequest(BaseModel):
     job_description: str
     
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 Base.metadata.create_all(bind=engine)
 
 @app.get("/")

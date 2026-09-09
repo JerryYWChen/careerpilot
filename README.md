@@ -13,7 +13,7 @@ Instead of asking a language model to directly generate an arbitrary match score
 - Human-defined evaluation cases
 - Automated planner tests
 - FastAPI backend
-- React + TypeScript frontend in development
+- React + TypeScript frontend with end-to-end FastAPI integration
 
 The project is currently under active development.
 
@@ -80,35 +80,66 @@ The goal is not only to tell a candidate how well a resume matches a role, but a
 
 ## Frontend
 
-A React + TypeScript frontend is currently under development.
+CareerPilot now includes a functional React + TypeScript frontend connected to the FastAPI backend.
 
-Current frontend foundation:
+Current frontend capabilities:
 
-- React
-- TypeScript
-- Vite
-- Controlled form state
-- Job-description input
+- Upload a PDF resume
+- Paste a job description using controlled form state
+- Run the complete resume-to-job analysis workflow
+- Display the extracted job title and deterministic match score
+- Render matched strengths and partial/missing gaps
+- Render the prioritized career action plan
+- Disable repeated submissions while analysis is running
+- Show loading feedback during analysis
+- Handle upload and analysis failures with user-facing error feedback
 
-The primary result interface is being designed around:
+The primary result interface currently presents:
 
 ```text
-Job Title / Match Score / Strengths / Gaps / Action Plan
+Job Title
+Match Score
+Strengths
+Gaps
+Career Action Plan
 ```
+
+Detailed evidence and reasoning remain available in the backend response and can be exposed through expandable result details in a future frontend iteration.
 
 ---
 
 # Architecture
 
-CareerPilot separates semantic AI reasoning from deterministic application rules.
+CareerPilot separates semantic AI reasoning from deterministic application rules while using the React frontend as the user-facing entry point and result layer.
 
 ```text
-Resume PDF                         Job Description
-    │                                    │
-    ↓                                    ↓
-Text Extraction                Requirement Extraction
-    │                                    │
-    └─────────────────┬──────────────────┘
+Resume PDF + Job Description
+            ↓
+React + TypeScript Frontend
+            ↓
+FastAPI API
+            ↓
+Resume Processing + AI Analysis Pipeline
+            ↓
+Structured Analysis Response
+            ↓
+React Results UI
+├── Job Title
+├── Match Score
+├── Strengths
+├── Gaps
+└── Career Action Plan
+```
+
+The backend analysis pipeline is:
+
+```text
+Resume PDF                          Job Description
+    │                                     │
+    ↓                                     ↓
+Text Extraction                 Requirement Extraction
+    │                                     │
+    └─────────────────┬───────────────────┘
                       ↓
              Evidence-Based Matcher
                       ↓
@@ -121,21 +152,21 @@ Text Extraction                Requirement Extraction
      Match Score              ┌────┴────┐
                               ↓         ↓
                          Strengths     Gaps
-                                        │
-                                        ↓
-                                  Career Planner
-                                        ↓
+                                       │
+                                       ↓
+                                 Career Planner
+                                       ↓
                               Structured Action Plan
-                                        ↓
+                                       ↓
                            Deterministic Validation
-                                  ↙           ↘
-                               Valid         Invalid
-                                 ↓              ↓
-                              Return      Validation Error
-                                                ↓
-                                         Planner Feedback
-                                                ↓
-                                            Regenerate
+                                 ↙           ↘
+                              Valid         Invalid
+                                ↓              ↓
+                              Return     Validation Error
+                                               ↓
+                                       Planner Feedback
+                                               ↓
+                                           Regenerate
 ```
 
 The architecture follows a central principle:
@@ -324,6 +355,8 @@ sum(match value × requirement weight)
 
 Every job requirement must have a corresponding match result. Missing results raise an error rather than silently changing the score.
 
+The current scoring policy remains intentionally simple while real-world resume/job-description cases are collected for future calibration.
+
 ---
 
 # Strengths and Gaps
@@ -402,15 +435,10 @@ Current validation rules include:
 
 ```text
 ✓ Action titles must be unique
-
 ✓ Priorities must be sequential
-
 ✓ addresses_gaps must reference real input gaps
-
 ✓ depends_on must reference real actions
-
 ✓ Every input gap must be addressed
-
 ✓ Dependency graphs must not contain cycles
 ```
 
@@ -480,13 +508,9 @@ Current tests verify:
 
 ```text
 ✓ Valid plans return without retry
-
 ✓ Invalid plans trigger regeneration
-
 ✓ Validation feedback reaches the next attempt
-
 ✓ Maximum retry attempts are enforced
-
 ✓ Empty gaps return an empty plan without generation
 ```
 
@@ -544,6 +568,8 @@ Overall run accuracy: 92.6%
 Known contextual-evidence boundary cases are intentionally retained rather than removed or overfit through prompt changes.
 
 This result measures performance only on the current human-defined evaluation suite and should not be interpreted as general accuracy across arbitrary resumes and job descriptions.
+
+Real-world job descriptions are now being used to identify additional cases involving compound requirements, evidence-classification consistency, and score calibration.
 
 ---
 
@@ -675,7 +701,7 @@ Simplified response structure:
 }
 ```
 
-The primary product interface will focus on:
+The primary product interface focuses on:
 
 ```text
 Job Title
@@ -685,7 +711,7 @@ Gaps
 Career Action Plan
 ```
 
-Resume highlights are retained as a backend capability but are not currently planned as a primary result-page section.
+Resume highlights are retained as a backend capability but are not currently a primary result-page section.
 
 ---
 
@@ -907,7 +933,10 @@ Local secrets such as API credentials are stored in `.env`, which is excluded fr
 - [x] Planner automated tests: 5/5 passing
 - [x] Planner retry behavior tests
 - [x] Validation-feedback propagation test
-- [ ] Expand matcher coverage with real-world failures
+- [ ] Expand matcher coverage with real-world job descriptions
+- [ ] Review requirement extraction for compound AND/OR requirements
+- [ ] Investigate evidence-classification consistency for direct skills such as SQL and PyTorch
+- [ ] Calibrate match scoring against real resume/JD cases
 - [ ] Add planner-quality evaluation cases
 
 ## Frontend
@@ -916,12 +945,18 @@ Local secrets such as API credentials are stored in `.env`, which is excluded fr
 - [x] Remove default Vite application shell
 - [x] Add initial CareerPilot application shell
 - [x] Add controlled job-description input
-- [ ] Add resume upload interface
-- [ ] Connect frontend to FastAPI
-- [ ] Add loading and error states
-- [ ] Build analysis result page
+- [x] Add PDF resume upload interface
+- [x] Connect React frontend to FastAPI
+- [x] Add sequential resume-upload and analysis requests
+- [x] Add loading state and duplicate-submission protection
+- [x] Add frontend error handling and user-facing failure feedback
+- [x] Display job title and match score
+- [x] Render strengths
+- [x] Render partial and missing gaps
+- [x] Render prioritized career action plan
+- [ ] Improve result-page layout and visual hierarchy
 - [ ] Add expandable strength and gap evidence
-- [ ] Add action-plan details
+- [ ] Add expandable action-plan details
 
 ## Future
 
@@ -974,31 +1009,43 @@ AI retries are explicitly limited to prevent uncontrolled loops.
 
 # Status
 
-CareerPilot currently has a functional end-to-end backend for resume analysis and career action planning.
+CareerPilot now has a functional end-to-end MVP spanning the React frontend and FastAPI backend.
 
 ```text
-Upload Resume
-    ↓
-Extract & Store Resume
-    ↓
+Upload Resume + Paste Job Description
+                ↓
+React Frontend
+                ↓
+Upload & Extract Resume
+                ↓
 Analyze Job Description
-    ↓
+                ↓
 Match Resume Evidence
-    ↓
+                ↓
 Calculate Deterministic Score
-    ↓
+                ↓
 Identify Strengths & Gaps
-    ↓
+                ↓
 Generate Cross-Gap Career Plan
-    ↓
-Validate Plan
-    ↓
-Repair Invalid Plans
-    ↓
+                ↓
+Validate / Repair Plan
+                ↓
 Return Structured API Response
+                ↓
+React Results UI
 ```
 
-Matcher v1 is currently frozen while the surrounding product architecture is developed.
+Current product output:
+
+```text
+Job Title
+Match Score
+Strengths
+Gaps
+Career Action Plan
+```
+
+Matcher v1 remains frozen while real-world job descriptions are used to identify requirement-extraction, evidence-classification, and score-calibration cases.
 
 Current regression baseline:
 
@@ -1013,14 +1060,10 @@ Planner control-flow tests:
 5 / 5 passing
 ```
 
-Frontend development has started with React, TypeScript, and Vite.
+The next development phase will focus on:
 
-The current product focus is building a clean user interface around five core outputs:
-
-```text
-Job Title
-Match Score
-Strengths
-Gaps
-Career Action Plan
-```
+- Evaluating matcher behavior on real-world job descriptions
+- Improving requirement extraction and evidence-classification consistency
+- Calibrating match scoring without overfitting individual examples
+- Improving frontend layout and result presentation
+- Adding expandable evidence, reasoning, and action-plan details
