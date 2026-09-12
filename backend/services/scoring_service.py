@@ -21,6 +21,54 @@ IMPORTANCE_WEIGHTS = {
     RequirementImportance.PREFERRED: 1,
 }
 
+def validate_resume_match_result(
+    match_result: ResumeMatchResult,
+    requirements: JobRequirements,
+) -> None:
+    expected_names = {
+        requirement.name.lower(): requirement.name
+        for requirement in requirements.requirements
+    }
+    actual_name_counts: dict[str, int] = {}
+    actual_names: dict[str, str] = {}
+
+    for match in match_result.matches:
+        normalized_name = match.requirement_name.lower()
+        actual_name_counts[normalized_name] = (
+            actual_name_counts.get(normalized_name, 0) + 1
+        )
+        actual_names.setdefault(normalized_name, match.requirement_name)
+
+    missing = sorted(
+        original_name
+        for normalized_name, original_name in expected_names.items()
+        if normalized_name not in actual_name_counts
+    )
+    duplicates = sorted(
+        actual_names[normalized_name]
+        for normalized_name, count in actual_name_counts.items()
+        if count > 1
+    )
+    unknown = sorted(
+        actual_names[normalized_name]
+        for normalized_name in actual_name_counts
+        if normalized_name not in expected_names
+    )
+
+    errors = []
+
+    if missing:
+        errors.append(f"Missing matches for requirements: {missing}.")
+
+    if duplicates:
+        errors.append(f"Duplicate matches for requirements: {duplicates}.")
+
+    if unknown:
+        errors.append(f"Unknown matches: {unknown}.")
+
+    if errors:
+        raise ValueError(" ".join(errors))
+
 def find_match(
     requirement: Requirement,
     match_result: ResumeMatchResult

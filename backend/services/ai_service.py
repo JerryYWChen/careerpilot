@@ -3,10 +3,12 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 from backend.models.analysis import Gap, JobRequirements, ResumeMatchResult, MatchAnalysis, ResumeHighlights, RecommendationReview, CareerActionPlan
+from backend.services.scoring_service import validate_resume_match_result
 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
+MAX_MATCH_ATTEMPTS = 3
 
 def analyze_job_description(job_description: str) -> JobRequirements:
     response = client.responses.parse(
@@ -34,10 +36,20 @@ def analyze_job_description(job_description: str) -> JobRequirements:
 
     return response.output_parsed
 
-def match_resume_to_requirements(
+def _generate_resume_match_result(
     resume_text: str,
-    job_requirements: JobRequirements
+    job_requirements: JobRequirements,
+    validation_feedback: str | None = None,
 ) -> ResumeMatchResult:
+    feedback_text = ""
+
+    if validation_feedback:
+        feedback_text = (
+            "\n\nA previous match result failed validation.\n"
+            f"Validation error: {validation_feedback}\n"
+            "Fix the coverage issue in the new match result."
+        )
+
     response = client.responses.parse(
         model="gpt-5.6-luna",
         input=[
@@ -90,6 +102,7 @@ def match_resume_to_requirements(
                     f"Resume:\n{resume_text}\n\n"
                     f"Job requirements:\n"
                     f"{job_requirements.model_dump_json()}"
+                    f"{feedback_text}"
                 ),
             },
         ],
@@ -97,6 +110,36 @@ def match_resume_to_requirements(
     )
 
     return response.output_parsed
+
+def match_resume_to_requirements(
+    resume_text: str,
+    job_requirements: JobRequirements,
+) -> ResumeMatchResult:
+    last_error = None
+    validation_feedback = None
+
+    for _ in range(MAX_MATCH_ATTEMPTS):
+        match_result = _generate_resume_match_result(
+            resume_text,
+            job_requirements,
+            validation_feedback=validation_feedback,
+        )
+
+        try:
+            validate_resume_match_result(
+                match_result,
+                job_requirements,
+            )
+            return match_result
+
+        except ValueError as error:
+            last_error = error
+            validation_feedback = str(error)
+
+    raise ValueError(
+        f"Failed to generate a valid resume match result "
+        f"after {MAX_MATCH_ATTEMPTS} attempts. Last error: {last_error}"
+    )
 
 def generate_resume_highlights(
     resume_text: str,
