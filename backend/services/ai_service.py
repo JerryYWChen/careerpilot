@@ -3,12 +3,10 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 from backend.models.analysis import Gap, JobRequirements, ResumeMatchResult, MatchAnalysis, ResumeHighlights, RecommendationReview, CareerActionPlan
-from backend.services.scoring_service import validate_resume_match_result
 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
-MAX_MATCH_ATTEMPTS = 3
 
 def analyze_job_description(job_description: str) -> JobRequirements:
     response = client.responses.parse(
@@ -115,31 +113,19 @@ def match_resume_to_requirements(
     resume_text: str,
     job_requirements: JobRequirements,
 ) -> ResumeMatchResult:
-    last_error = None
-    validation_feedback = None
+    from backend.agents.matching_graph import resume_matching_graph
 
-    for _ in range(MAX_MATCH_ATTEMPTS):
-        match_result = _generate_resume_match_result(
-            resume_text,
-            job_requirements,
-            validation_feedback=validation_feedback,
-        )
-
-        try:
-            validate_resume_match_result(
-                match_result,
-                job_requirements,
-            )
-            return match_result
-
-        except ValueError as error:
-            last_error = error
-            validation_feedback = str(error)
-
-    raise ValueError(
-        f"Failed to generate a valid resume match result "
-        f"after {MAX_MATCH_ATTEMPTS} attempts. Last error: {last_error}"
+    result = resume_matching_graph.invoke(
+        {
+            "resume_text": resume_text,
+            "job_requirements": job_requirements,
+            "match_result": None,
+            "validation_feedback": None,
+            "attempt_count": 0,
+        }
     )
+
+    return result["match_result"]
 
 def generate_resume_highlights(
     resume_text: str,

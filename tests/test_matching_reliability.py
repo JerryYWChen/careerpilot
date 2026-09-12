@@ -86,7 +86,7 @@ def test_validator_rejects_unknown_match():
         validate_resume_match_result(result, requirements)
 
 
-def test_invalid_result_retries_and_passes_feedback_to_next_attempt():
+def test_langgraph_retries_invalid_result_and_passes_feedback():
     requirements = make_requirements("Python", "Docker")
     invalid_result = ResumeMatchResult(matches=[make_match("Python")])
     valid_result = ResumeMatchResult(
@@ -128,7 +128,7 @@ def test_validation_feedback_is_included_in_retry_prompt():
     assert "Validation error: Unknown matches: ['Docker']." in user_prompt
 
 
-def test_valid_result_returns_without_retry():
+def test_langgraph_returns_valid_result_without_retry():
     requirements = make_requirements("Python")
     valid_result = ResumeMatchResult(matches=[make_match("Python")])
 
@@ -142,7 +142,7 @@ def test_valid_result_returns_without_retry():
     assert mock_generate.call_count == 1
 
 
-def test_retry_exhaustion_raises_after_three_generation_attempts():
+def test_langgraph_retry_exhaustion_raises_after_three_generation_attempts():
     requirements = make_requirements("Python", "Docker")
     invalid_result = ResumeMatchResult(matches=[make_match("Python")])
 
