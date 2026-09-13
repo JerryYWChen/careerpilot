@@ -16,6 +16,7 @@ class ResumeMatchingState(TypedDict):
     match_result: ResumeMatchResult | None
     validation_feedback: str | None
     attempt_count: int
+    retries_exhausted: bool
 
 
 def generate_match_node(state: ResumeMatchingState):
@@ -53,18 +54,14 @@ def route_after_validation(state: ResumeMatchingState):
     return "failed"
 
 
-def raise_match_validation_error(state: ResumeMatchingState):
-    raise ValueError(
-        f"Failed to generate a valid resume match result "
-        f"after {MAX_MATCH_ATTEMPTS} attempts. "
-        f"Last error: {state['validation_feedback']}"
-    )
+def mark_retries_exhausted_node(state: ResumeMatchingState):
+    return {"retries_exhausted": True}
 
 
 builder = StateGraph(ResumeMatchingState)
 builder.add_node("generate_match", generate_match_node)
 builder.add_node("validate_match", validate_match_node)
-builder.add_node("raise_validation_error", raise_match_validation_error)
+builder.add_node("mark_retries_exhausted", mark_retries_exhausted_node)
 
 builder.add_edge(START, "generate_match")
 builder.add_edge("generate_match", "validate_match")
@@ -74,8 +71,25 @@ builder.add_conditional_edges(
     {
         "complete": END,
         "retry": "generate_match",
-        "failed": "raise_validation_error",
+        "failed": "mark_retries_exhausted",
     },
 )
+builder.add_edge("mark_retries_exhausted", END)
 
 resume_matching_graph = builder.compile()
+
+
+def run_resume_matching_workflow(
+    resume_text: str,
+    job_requirements: JobRequirements,
+) -> ResumeMatchingState:
+    return resume_matching_graph.invoke(
+        {
+            "resume_text": resume_text,
+            "job_requirements": job_requirements,
+            "match_result": None,
+            "validation_feedback": None,
+            "attempt_count": 0,
+            "retries_exhausted": False,
+        }
+    )

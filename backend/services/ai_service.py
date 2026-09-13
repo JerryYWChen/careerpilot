@@ -7,10 +7,13 @@ from backend.models.analysis import Gap, JobRequirements, ResumeMatchResult, Mat
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
+MODEL_NAME = "gpt-5.6-luna"
+MATCH_PROMPT_VERSION = "match-v1"
+PLAN_PROMPT_VERSION = "plan-v1"
 
 def analyze_job_description(job_description: str) -> JobRequirements:
     response = client.responses.parse(
-        model="gpt-5.6-luna",
+        model=MODEL_NAME,
         input=[
             {
                 "role": "system",
@@ -49,7 +52,7 @@ def _generate_resume_match_result(
         )
 
     response = client.responses.parse(
-        model="gpt-5.6-luna",
+        model=MODEL_NAME,
         input=[
             {
                 "role": "system",
@@ -113,17 +116,19 @@ def match_resume_to_requirements(
     resume_text: str,
     job_requirements: JobRequirements,
 ) -> ResumeMatchResult:
-    from backend.agents.matching_graph import resume_matching_graph
+    from backend.agents.matching_graph import run_resume_matching_workflow
 
-    result = resume_matching_graph.invoke(
-        {
-            "resume_text": resume_text,
-            "job_requirements": job_requirements,
-            "match_result": None,
-            "validation_feedback": None,
-            "attempt_count": 0,
-        }
+    result = run_resume_matching_workflow(
+        resume_text,
+        job_requirements,
     )
+
+    if result["retries_exhausted"]:
+        raise ValueError(
+            f"Failed to generate a valid resume match result "
+            f"after {result['attempt_count']} attempts. "
+            f"Last error: {result['validation_feedback']}"
+        )
 
     return result["match_result"]
 
@@ -134,7 +139,7 @@ def generate_resume_highlights(
 ) -> ResumeHighlights:
 
     response = client.responses.parse(
-        model="gpt-5.6-luna",
+        model=MODEL_NAME,
         input=[
             {
                 "role": "system",
@@ -208,7 +213,7 @@ the reviewer feedback.
 """
 
     response = client.responses.create(
-        model="gpt-5.6-luna",
+        model=MODEL_NAME,
         input=prompt,
     )
 
@@ -253,7 +258,7 @@ the reviewer feedback.
 """
 
     response = client.responses.create(
-        model="gpt-5.6-luna",
+        model=MODEL_NAME,
         input=prompt,
     )
 
@@ -265,7 +270,7 @@ def review_recommendation(
 ) -> RecommendationReview:
 
     response = client.responses.parse(
-        model="gpt-5.6-luna",
+        model=MODEL_NAME,
         input=[
             {
                 "role": "system",
@@ -317,7 +322,7 @@ def generate_career_action_plan(
         )
 
     response = client.responses.parse(
-        model="gpt-5.6-luna",
+        model=MODEL_NAME,
         input=[
             {
                 "role": "system",

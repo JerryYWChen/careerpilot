@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
+from backend.agents.matching_graph import run_resume_matching_workflow
 from backend.models.analysis import (
     JobRequirements,
     MatchStatus,
@@ -10,7 +11,7 @@ from backend.models.analysis import (
     RequirementMatch,
     ResumeMatchResult,
 )
-from backend.services.ai_service import match_resume_to_requirements
+from backend.services.ai_service import MODEL_NAME, match_resume_to_requirements
 from backend.services.scoring_service import validate_resume_match_result
 
 
@@ -97,9 +98,11 @@ def test_langgraph_retries_invalid_result_and_passes_feedback():
         "backend.services.ai_service._generate_resume_match_result",
         side_effect=[invalid_result, valid_result],
     ) as mock_generate:
-        result = match_resume_to_requirements("Resume text", requirements)
+        state = run_resume_matching_workflow("Resume text", requirements)
 
-    assert result == valid_result
+    assert state["match_result"] == valid_result
+    assert state["attempt_count"] == 2
+    assert state["retries_exhausted"] is False
     assert mock_generate.call_count == 2
     assert mock_generate.call_args_list[0].kwargs["validation_feedback"] is None
     assert mock_generate.call_args_list[1].kwargs["validation_feedback"] == (
@@ -124,6 +127,7 @@ def test_validation_feedback_is_included_in_retry_prompt():
         )
 
     user_prompt = mock_parse.call_args.kwargs["input"][1]["content"]
+    assert mock_parse.call_args.kwargs["model"] == MODEL_NAME
     assert "A previous match result failed validation." in user_prompt
     assert "Validation error: Unknown matches: ['Docker']." in user_prompt
 
@@ -140,6 +144,37 @@ def test_langgraph_returns_valid_result_without_retry():
 
     assert result == valid_result
     assert mock_generate.call_count == 1
+
+
+def test_state_runner_exposes_first_attempt_success():
+    requirements = make_requirements("Python")
+    valid_result = ResumeMatchResult(matches=[make_match("Python")])
+
+    with patch(
+        "backend.services.ai_service._generate_resume_match_result",
+        return_value=valid_result,
+    ):
+        state = run_resume_matching_workflow("Resume text", requirements)
+
+    assert state["match_result"] == valid_result
+    assert state["attempt_count"] == 1
+    assert state["retries_exhausted"] is False
+
+
+def test_state_runner_marks_retry_exhaustion_without_raising():
+    requirements = make_requirements("Python", "Docker")
+    invalid_result = ResumeMatchResult(matches=[make_match("Python")])
+
+    with patch(
+        "backend.services.ai_service._generate_resume_match_result",
+        return_value=invalid_result,
+    ) as mock_generate:
+        state = run_resume_matching_workflow("Resume text", requirements)
+
+    assert state["match_result"] == invalid_result
+    assert state["attempt_count"] == 3
+    assert state["retries_exhausted"] is True
+    assert mock_generate.call_count == 3
 
 
 def test_langgraph_retry_exhaustion_raises_after_three_generation_attempts():
