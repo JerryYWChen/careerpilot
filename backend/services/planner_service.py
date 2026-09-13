@@ -85,30 +85,20 @@ def validate_career_action_plan(
 
 def create_validated_career_action_plan(
     gaps: list[Gap],
-    max_attempts: int = 3,
 ) -> CareerActionPlan:
 
     if not gaps:
         return CareerActionPlan(actions=[])
 
-    last_error = None
-    validation_feedback = None
+    from backend.agents.planning_graph import career_plan_graph
 
-    for _ in range(max_attempts):
-        plan = generate_career_action_plan(
-            gaps,
-            validation_feedback=validation_feedback,
-        )
-
-        try:
-            validate_career_action_plan(plan, gaps)
-            return plan
-
-        except ValueError as error:
-            last_error = error
-            validation_feedback = str(error)
-
-    raise ValueError(
-        f"Failed to generate a valid career action plan "
-        f"after {max_attempts} attempts. Last error: {last_error}"
+    result = career_plan_graph.invoke(
+        {
+            "gaps": gaps,
+            "career_action_plan": None,
+            "validation_feedback": None,
+            "attempt_count": 0,
+        }
     )
+
+    return result["career_action_plan"]

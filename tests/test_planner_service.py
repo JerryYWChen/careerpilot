@@ -11,7 +11,7 @@ from backend.services.planner_service import (
 )
 import pytest
 
-def test_valid_plan_returns_without_retry():
+def test_langgraph_returns_valid_plan_without_retry():
     gaps = [
         Gap(
             area="Docker",
@@ -43,7 +43,7 @@ def test_valid_plan_returns_without_retry():
     assert result == valid_plan
     assert mock_generate.call_count == 1
 
-def test_invalid_plan_retries_then_returns_valid_plan():
+def test_langgraph_retries_invalid_plan_then_returns_valid_plan():
     gaps = [
         Gap(
             area="Docker",
@@ -87,7 +87,7 @@ def test_invalid_plan_retries_then_returns_valid_plan():
     assert result == valid_plan
     assert mock_generate.call_count == 2
 
-def test_validation_feedback_reaches_next_attempt():
+def test_langgraph_passes_validation_feedback_to_next_attempt():
     gaps = [
         Gap(
             area="Docker",
@@ -141,7 +141,7 @@ def test_validation_feedback_reaches_next_attempt():
         == "Unknown gap 'Docker (missing)' in action 'Learn Docker'."
     )
 
-def test_max_attempts_exhausted_raises_error():
+def test_langgraph_max_attempts_exhausted_raises_error():
     gaps = [
         Gap(
             area="Docker",
@@ -172,10 +172,7 @@ def test_max_attempts_exhausted_raises_error():
             ValueError,
             match="after 3 attempts",
         ):
-            create_validated_career_action_plan(
-                gaps,
-                max_attempts=3,
-            )
+            create_validated_career_action_plan(gaps)
 
     assert mock_generate.call_count == 3
 
