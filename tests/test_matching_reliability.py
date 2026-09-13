@@ -11,7 +11,14 @@ from backend.models.analysis import (
     RequirementMatch,
     ResumeMatchResult,
 )
-from backend.services.ai_service import MODEL_NAME, match_resume_to_requirements
+from backend.services.ai_service import (
+    MATCH_PROMPT_VERSION,
+    MATCH_SYSTEM_PROMPTS,
+    MATCH_V1_SYSTEM_PROMPT,
+    MATCH_V2_SYSTEM_PROMPT,
+    MODEL_NAME,
+    match_resume_to_requirements,
+)
 from backend.services.scoring_service import validate_resume_match_result
 
 
@@ -127,9 +134,18 @@ def test_validation_feedback_is_included_in_retry_prompt():
         )
 
     user_prompt = mock_parse.call_args.kwargs["input"][1]["content"]
+    system_prompt = mock_parse.call_args.kwargs["input"][0]["content"]
     assert mock_parse.call_args.kwargs["model"] == MODEL_NAME
+    assert system_prompt == MATCH_V2_SYSTEM_PROMPT
     assert "A previous match result failed validation." in user_prompt
     assert "Validation error: Unknown matches: ['Docker']." in user_prompt
+
+
+def test_match_v1_prompt_is_preserved_while_match_v2_is_active():
+    assert MATCH_PROMPT_VERSION == "match-v2"
+    assert MATCH_SYSTEM_PROMPTS["match-v1"] == MATCH_V1_SYSTEM_PROMPT
+    assert MATCH_SYSTEM_PROMPTS["match-v2"] == MATCH_V2_SYSTEM_PROMPT
+    assert MATCH_V1_SYSTEM_PROMPT != MATCH_V2_SYSTEM_PROMPT
 
 
 def test_langgraph_returns_valid_result_without_retry():

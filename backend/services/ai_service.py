@@ -8,8 +8,115 @@ load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 MODEL_NAME = "gpt-5.6-luna"
-MATCH_PROMPT_VERSION = "match-v1"
+MATCH_PROMPT_VERSION = "match-v2"
 PLAN_PROMPT_VERSION = "plan-v1"
+
+MATCH_V1_SYSTEM_PROMPT = (
+    "Evaluate the resume against every provided job requirement. "
+    "Return exactly one match result for every requirement. "
+
+    "Use only information and evidence contained in the resume. "
+    "Do not invent, assume, or exaggerate the candidate's skills, experience, "
+    "achievements, or qualifications. "
+
+    "Evaluate the total strength of the evidence for each requirement. "
+    "Evidence may come from skills, work experience, projects, research, "
+    "education, certifications, technologies, frameworks, libraries, or "
+    "implementation details. Consider multiple pieces of related evidence "
+    "together rather than evaluating each piece in isolation. "
+
+    "Classify a requirement as 'matched' when the resume provides either direct "
+    "evidence or strong contextual evidence that reliably demonstrates the "
+    "requirement. Strong contextual evidence can come from a combination of "
+    "related technologies, frameworks, libraries, and concrete implementation "
+    "work, even when the exact requirement keyword is not explicitly stated. "
+
+    "Classify a requirement as 'partial' when relevant evidence exists but is "
+    "weak, incomplete, indirect, or insufficient to reliably establish the "
+    "requirement. A skill that is only listed in the Skills section without "
+    "supporting contextual or practical evidence should normally be classified "
+    "as 'partial'. "
+
+    "Classify a requirement as 'missing' when the resume provides no reasonable "
+    "evidence supporting the requirement. Do not infer a requirement merely from "
+    "a broadly related field, coursework, or a single weakly related technology. "
+
+    "For requirements that specify a minimum number of years, compare the resume "
+    "evidence with the required number of years. If relevant experience exists "
+    "but the minimum number of years is not satisfied or cannot be clearly "
+    "established, classify the requirement as 'partial'. "
+
+    "Provide evidence from the resume whenever evidence exists. "
+    "Explain why the evidence supports the classification. "
+    "When relying on contextual evidence, explain how the combination of evidence "
+    "reliably supports the requirement."
+)
+
+MATCH_V2_SYSTEM_PROMPT = (
+    "Evaluate the resume against every provided job requirement. "
+    "Return exactly one match result for every requirement. "
+
+    "Use only information and evidence contained in the resume. "
+    "Do not invent, assume, or exaggerate the candidate's skills, experience, "
+    "achievements, or qualifications. "
+
+    "For each requirement, determine whether the resume provides reliable evidence "
+    "that the candidate possesses and satisfies the required capability. "
+
+    "Direct evidence explicitly states the required skill, technology, "
+    "responsibility, or experience. Contextual evidence may support a requirement "
+    "when concrete implementation details reliably imply the required capability, "
+    "even if the exact keyword is absent. Contextual evidence must be strong enough "
+    "that possession of the required capability can reasonably be inferred from "
+    "what the candidate actually did. "
+
+    "Related, adjacent, or transferable experience alone is not evidence that the "
+    "candidate possesses the requirement itself. Do not classify a requirement as "
+    "'partial' merely because the resume contains a related technology, "
+    "responsibility, or domain. "
+
+    "Evaluate the total strength of the reliable evidence for each requirement. "
+    "Evidence may come from skills, work experience, projects, research, "
+    "education, certifications, technologies, frameworks, libraries, or "
+    "implementation details. Consider multiple pieces of evidence together when "
+    "they collectively establish the same required capability. "
+
+    "Classify a requirement as 'matched' when direct evidence or strong contextual "
+    "evidence reliably demonstrates that the candidate possesses and satisfies the "
+    "requirement. "
+
+    "Classify a requirement as 'partial' only when reliable evidence of the "
+    "requirement itself exists, but it does not fully satisfy the required "
+    "strength, depth, duration, or combination. A skill listed without supporting "
+    "contextual or practical evidence should normally be classified as 'partial'. "
+    "For a compound requirement that requires multiple capabilities together, "
+    "classify it as 'partial' when reliable evidence establishes only part of the "
+    "required combination. "
+
+    "Classify a requirement as 'missing' when the resume provides no reliable "
+    "evidence that the candidate possesses the requirement itself. Related or "
+    "transferable experience must not be used to upgrade a missing requirement to "
+    "'partial'. "
+
+    "For requirements that specify a minimum number of years, compare the resume "
+    "evidence with the required number of years. If relevant experience exists "
+    "but the minimum number of years is not satisfied or cannot be clearly "
+    "established, classify the requirement as 'partial'. Do not add overlapping "
+    "time periods more than once. "
+
+    "Provide evidence from the resume whenever reliable evidence of the requirement "
+    "exists. Evidence and evidence_sources must identify positive evidence that the "
+    "candidate possesses the requirement. Negative evidence may be explained in "
+    "the reason, but it must not be listed as positive evidence or as an "
+    "evidence_source. Explain why the evidence supports the classification. When "
+    "relying on contextual evidence, explain how the concrete implementation work "
+    "reliably implies the required capability."
+)
+
+MATCH_SYSTEM_PROMPTS = {
+    "match-v1": MATCH_V1_SYSTEM_PROMPT,
+    "match-v2": MATCH_V2_SYSTEM_PROMPT,
+}
 
 def analyze_job_description(job_description: str) -> JobRequirements:
     response = client.responses.parse(
@@ -56,46 +163,7 @@ def _generate_resume_match_result(
         input=[
             {
                 "role": "system",
-                "content": (
-                    "Evaluate the resume against every provided job requirement. "
-                    "Return exactly one match result for every requirement. "
-
-                    "Use only information and evidence contained in the resume. "
-                    "Do not invent, assume, or exaggerate the candidate's skills, experience, "
-                    "achievements, or qualifications. "
-
-                    "Evaluate the total strength of the evidence for each requirement. "
-                    "Evidence may come from skills, work experience, projects, research, "
-                    "education, certifications, technologies, frameworks, libraries, or "
-                    "implementation details. Consider multiple pieces of related evidence "
-                    "together rather than evaluating each piece in isolation. "
-
-                    "Classify a requirement as 'matched' when the resume provides either direct "
-                    "evidence or strong contextual evidence that reliably demonstrates the "
-                    "requirement. Strong contextual evidence can come from a combination of "
-                    "related technologies, frameworks, libraries, and concrete implementation "
-                    "work, even when the exact requirement keyword is not explicitly stated. "
-
-                    "Classify a requirement as 'partial' when relevant evidence exists but is "
-                    "weak, incomplete, indirect, or insufficient to reliably establish the "
-                    "requirement. A skill that is only listed in the Skills section without "
-                    "supporting contextual or practical evidence should normally be classified "
-                    "as 'partial'. "
-
-                    "Classify a requirement as 'missing' when the resume provides no reasonable "
-                    "evidence supporting the requirement. Do not infer a requirement merely from "
-                    "a broadly related field, coursework, or a single weakly related technology. "
-
-                    "For requirements that specify a minimum number of years, compare the resume "
-                    "evidence with the required number of years. If relevant experience exists "
-                    "but the minimum number of years is not satisfied or cannot be clearly "
-                    "established, classify the requirement as 'partial'. "
-
-                    "Provide evidence from the resume whenever evidence exists. "
-                    "Explain why the evidence supports the classification. "
-                    "When relying on contextual evidence, explain how the combination of evidence "
-                    "reliably supports the requirement."
-                ),
+                "content": MATCH_SYSTEM_PROMPTS[MATCH_PROMPT_VERSION],
             },
             {
                 "role": "user",
