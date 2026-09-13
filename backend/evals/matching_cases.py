@@ -370,11 +370,8 @@ Built a marketing site with Next.js and reusable React components.
     ),
     expected_matches={
         "TypeScript": ExpectedMatch(
-            status=MatchStatus.PARTIAL,
-            evidence_sources=[
-                EvidenceSource.SKILLS,
-                EvidenceSource.PROJECTS,
-            ],
+            status=MatchStatus.MISSING,
+            evidence_sources=[],
         ),
     },
     policy_rationale=(
@@ -409,11 +406,8 @@ Used Docker Compose to run the services locally.
     ),
     expected_matches={
         "Kubernetes": ExpectedMatch(
-            status=MatchStatus.PARTIAL,
-            evidence_sources=[
-                EvidenceSource.SKILLS,
-                EvidenceSource.PROJECTS,
-            ],
+            status=MatchStatus.MISSING,
+            evidence_sources=[],
         ),
     },
     policy_rationale=(
@@ -539,12 +533,8 @@ Built an event-driven image processor using Azure Functions.
             ],
         ),
         "AWS Lambda": ExpectedMatch(
-            status=MatchStatus.PARTIAL,
-            evidence_sources=[
-                EvidenceSource.SKILLS,
-                EvidenceSource.EXPERIENCE,
-                EvidenceSource.PROJECTS,
-            ],
+            status=MatchStatus.MISSING,
+            evidence_sources=[],
         ),
     },
     policy_rationale=(
@@ -663,9 +653,7 @@ hiring, compensation, or performance reviews.
     expected_matches={
         "People management experience": ExpectedMatch(
             status=MatchStatus.MISSING,
-            evidence_sources=[
-                EvidenceSource.EXPERIENCE,
-            ],
+            evidence_sources=[],
         ),
     },
     policy_rationale=(
