@@ -16,6 +16,7 @@ class MatchingEvalCase(BaseModel):
     resume_text: str
     job_requirements: JobRequirements
     expected_matches: dict[str, ExpectedMatch]
+    policy_rationale: str | None = None
 
 case_1 = MatchingEvalCase(
     name="Mixed Evidence",
@@ -344,6 +345,335 @@ Built an LLM evaluation pipeline for benchmarking model performance.
     }
 )
 
+case_10 = MatchingEvalCase(
+    name="Next.js Does Not Reliably Establish TypeScript",
+    resume_text="""
+Frontend Developer
+
+Skills:
+Next.js, React
+
+Projects:
+Built a marketing site with Next.js and reusable React components.
+""",
+    job_requirements=JobRequirements(
+        job_title="Frontend Engineer",
+        seniority_level="unknown",
+        summary="Frontend role requiring TypeScript experience.",
+        requirements=[
+            Requirement(
+                name="TypeScript",
+                category="skill",
+                importance="required"
+            )
+        ]
+    ),
+    expected_matches={
+        "TypeScript": ExpectedMatch(
+            status=MatchStatus.PARTIAL,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.PROJECTS,
+            ],
+        ),
+    },
+    policy_rationale=(
+        "Next.js supports both JavaScript and TypeScript. The framework evidence "
+        "is relevant but does not establish that TypeScript was used."
+    ),
+)
+
+case_11 = MatchingEvalCase(
+    name="Container Experience Without Orchestration",
+    resume_text="""
+Backend Developer
+
+Skills:
+Docker, Docker Compose
+
+Projects:
+Containerized a web API and database.
+Used Docker Compose to run the services locally.
+""",
+    job_requirements=JobRequirements(
+        job_title="Platform Engineer",
+        seniority_level="unknown",
+        summary="Platform role requiring Kubernetes experience.",
+        requirements=[
+            Requirement(
+                name="Kubernetes",
+                category="skill",
+                importance="required"
+            )
+        ]
+    ),
+    expected_matches={
+        "Kubernetes": ExpectedMatch(
+            status=MatchStatus.PARTIAL,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.PROJECTS,
+            ],
+        ),
+    },
+    policy_rationale=(
+        "Containerization is relevant preparation, but Docker Compose does not "
+        "demonstrate Kubernetes cluster or orchestration experience."
+    ),
+)
+
+case_12 = MatchingEvalCase(
+    name="Compound AND Requirement Partially Satisfied",
+    resume_text="""
+Backend Developer
+
+Skills:
+Python, FastAPI
+
+Projects:
+Built and deployed REST APIs using Python and FastAPI.
+""",
+    job_requirements=JobRequirements(
+        job_title="Backend Engineer",
+        seniority_level="unknown",
+        summary="Backend role requiring both Python and Django.",
+        requirements=[
+            Requirement(
+                name="Python and Django",
+                category="skill",
+                importance="required"
+            )
+        ]
+    ),
+    expected_matches={
+        "Python and Django": ExpectedMatch(
+            status=MatchStatus.PARTIAL,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.PROJECTS,
+            ],
+        ),
+    },
+    policy_rationale=(
+        "Python is strongly established, but a conjunctive requirement is not "
+        "fully satisfied because the resume provides no Django evidence."
+    ),
+)
+
+case_13 = MatchingEvalCase(
+    name="Compound OR Requirement Satisfied",
+    resume_text="""
+Cloud Developer
+
+Skills:
+Azure, C#
+
+Experience:
+Deployed services using Azure App Service and Azure Blob Storage.
+Implemented event-driven processing with Azure Functions.
+""",
+    job_requirements=JobRequirements(
+        job_title="Cloud Engineer",
+        seniority_level="unknown",
+        summary="Cloud role accepting either AWS or Azure experience.",
+        requirements=[
+            Requirement(
+                name="AWS or Azure cloud experience",
+                category="experience",
+                importance="required"
+            )
+        ]
+    ),
+    expected_matches={
+        "AWS or Azure cloud experience": ExpectedMatch(
+            status=MatchStatus.MATCHED,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.EXPERIENCE,
+            ],
+        ),
+    },
+    policy_rationale=(
+        "An OR requirement needs only one alternative, and the resume contains "
+        "direct practical Azure evidence."
+    ),
+)
+
+case_14 = MatchingEvalCase(
+    name="AWS Platform and Lambda Are Separate Requirements",
+    resume_text="""
+Cloud Engineer
+
+Skills:
+AWS, Azure Functions
+
+Experience:
+Deployed applications to Amazon EC2 and stored assets in Amazon S3.
+
+Projects:
+Built an event-driven image processor using Azure Functions.
+""",
+    job_requirements=JobRequirements(
+        job_title="Cloud Engineer",
+        seniority_level="unknown",
+        summary="Cloud role requiring AWS platform and AWS Lambda experience.",
+        requirements=[
+            Requirement(
+                name="AWS cloud experience",
+                category="experience",
+                importance="required"
+            ),
+            Requirement(
+                name="AWS Lambda",
+                category="skill",
+                importance="required"
+            ),
+        ]
+    ),
+    expected_matches={
+        "AWS cloud experience": ExpectedMatch(
+            status=MatchStatus.MATCHED,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.EXPERIENCE,
+            ],
+        ),
+        "AWS Lambda": ExpectedMatch(
+            status=MatchStatus.PARTIAL,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.EXPERIENCE,
+                EvidenceSource.PROJECTS,
+            ],
+        ),
+    },
+    policy_rationale=(
+        "EC2 and S3 establish broad AWS experience. Azure Functions supplies "
+        "related serverless evidence, but it does not prove direct Lambda use."
+    ),
+)
+
+case_15 = MatchingEvalCase(
+    name="Experience Exactly Meets Minimum",
+    resume_text="""
+Backend Engineer
+
+Skills:
+Python
+
+Experience:
+Python Backend Engineer — January 2022 to January 2025
+Built and maintained production Python APIs throughout this role.
+""",
+    job_requirements=JobRequirements(
+        job_title="Backend Engineer",
+        seniority_level="mid",
+        summary="Backend role requiring at least three years of Python experience.",
+        requirements=[
+            Requirement(
+                name="Python experience",
+                category="experience",
+                importance="required",
+                minimum_years=3
+            )
+        ]
+    ),
+    expected_matches={
+        "Python experience": ExpectedMatch(
+            status=MatchStatus.MATCHED,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.EXPERIENCE,
+            ],
+        ),
+    },
+    policy_rationale=(
+        "The resume explicitly establishes exactly three years of relevant "
+        "experience, which meets the stated threshold."
+    ),
+)
+
+case_16 = MatchingEvalCase(
+    name="Overlapping Experience Does Not Add Linearly",
+    resume_text="""
+Backend Engineer
+
+Skills:
+Python
+
+Experience:
+Python Engineer — January 2024 to January 2026
+Built backend APIs in Python.
+
+Freelance Python Developer — January 2024 to January 2026
+Maintained a Python automation service alongside the full-time role.
+""",
+    job_requirements=JobRequirements(
+        job_title="Backend Engineer",
+        seniority_level="mid",
+        summary="Backend role requiring at least three years of Python experience.",
+        requirements=[
+            Requirement(
+                name="Python experience",
+                category="experience",
+                importance="required",
+                minimum_years=3
+            )
+        ]
+    ),
+    expected_matches={
+        "Python experience": ExpectedMatch(
+            status=MatchStatus.PARTIAL,
+            evidence_sources=[
+                EvidenceSource.SKILLS,
+                EvidenceSource.EXPERIENCE,
+            ],
+        ),
+    },
+    policy_rationale=(
+        "The roles overlap completely, so they establish two elapsed years of "
+        "experience rather than four."
+    ),
+)
+
+case_17 = MatchingEvalCase(
+    name="Leadership Signals Without People Management",
+    resume_text="""
+Senior Software Engineer
+
+Experience:
+Led architecture discussions, mentored two junior engineers, coordinated releases,
+presented quarterly roadmaps, and served as technical lead for a migration.
+
+This was an individual-contributor role. I had no direct reports and did not perform
+hiring, compensation, or performance reviews.
+""",
+    job_requirements=JobRequirements(
+        job_title="Engineering Manager",
+        seniority_level="lead",
+        summary="Management role requiring people management experience.",
+        requirements=[
+            Requirement(
+                name="People management experience",
+                category="experience",
+                importance="required"
+            )
+        ]
+    ),
+    expected_matches={
+        "People management experience": ExpectedMatch(
+            status=MatchStatus.MISSING,
+            evidence_sources=[
+                EvidenceSource.EXPERIENCE,
+            ],
+        ),
+    },
+    policy_rationale=(
+        "The resume contains leadership signals but explicitly denies the core "
+        "responsibilities of people management."
+    ),
+)
+
 MATCHING_EVAL_CASES = [
     case_1,
     case_2,
@@ -354,4 +684,12 @@ MATCHING_EVAL_CASES = [
     case_7,
     case_8,
     case_9,
+    case_10,
+    case_11,
+    case_12,
+    case_13,
+    case_14,
+    case_15,
+    case_16,
+    case_17,
 ]

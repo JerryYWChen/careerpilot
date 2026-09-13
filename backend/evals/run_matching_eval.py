@@ -41,8 +41,17 @@ def calculate_evaluation_metrics(run_results: list[dict]) -> dict:
         result["retries_exhausted"]
         for result in run_results
     )
-    semantic_passes = sum(
-        result["semantic_passed"]
+    status_passes = sum(
+        result["status_passed"]
+        for result in run_results
+    )
+    evidence_source_passes = sum(
+        result["evidence_sources_passed"]
+        for result in run_results
+    )
+    strict_semantic_passes = sum(
+        result["status_passed"]
+        and result["evidence_sources_passed"]
         for result in run_results
     )
 
@@ -64,18 +73,31 @@ def calculate_evaluation_metrics(run_results: list[dict]) -> dict:
         "repair_recovery_percent": recovery_percent,
         "retry_exhaustion_count": retry_exhaustions,
         "retry_exhaustion_percent": percentage(retry_exhaustions, total_runs),
-        "semantic_pass_count": semantic_passes,
-        "semantic_accuracy_percent": percentage(semantic_passes, total_runs),
+        "status_pass_count": status_passes,
+        "status_accuracy_percent": percentage(status_passes, total_runs),
+        "evidence_source_pass_count": evidence_source_passes,
+        "evidence_source_accuracy_percent": percentage(
+            evidence_source_passes,
+            total_runs,
+        ),
+        "strict_semantic_pass_count": strict_semantic_passes,
+        "strict_semantic_accuracy_percent": percentage(
+            strict_semantic_passes,
+            total_runs,
+        ),
     }
 
 
-def evaluate_semantic_result(case, actual_result) -> bool:
-    passed = 0
+def evaluate_semantic_result(case, actual_result) -> tuple[bool, bool]:
+    status_passed = True
+    evidence_sources_passed = True
 
     for requirement_name, expected_match in case.expected_matches.items():
         actual_match = find_actual_match(requirement_name, actual_result)
 
         if actual_match is None:
+            status_passed = False
+            evidence_sources_passed = False
             print(f"  FAIL: {requirement_name}")
             print(f"    expected status: {expected_match.status.value}")
             print("    actual: no match returned")
@@ -89,23 +111,24 @@ def evaluate_semantic_result(case, actual_result) -> bool:
         )
 
         if status_matches and sources_match:
-            passed += 1
             continue
 
         print(f"  FAIL: {requirement_name}")
 
         if not status_matches:
+            status_passed = False
             print(f"    expected status: {expected_match.status.value}")
             print(f"    actual status:   {actual_match.status.value}")
 
         if not sources_match:
+            evidence_sources_passed = False
             print(f"    expected sources: {expected_match.evidence_sources}")
             print(f"    actual sources:   {actual_match.evidence_sources}")
 
         print(f"    evidence: {actual_match.evidence}")
         print(f"    reason:   {actual_match.reason}")
 
-    return passed == len(case.expected_matches)
+    return status_passed, evidence_sources_passed
 
 
 def format_metric(count: int, total: int, percent: float | None) -> str:
@@ -135,7 +158,8 @@ def main():
 
             if exhausted:
                 print(f"Run {run} coverage: EXHAUSTED@{attempt_count}")
-                semantic_passed = False
+                status_passed = False
+                evidence_sources_passed = False
             else:
                 if attempt_count == 1:
                     coverage_result = "PASS@1"
@@ -143,28 +167,40 @@ def main():
                     coverage_result = f"RECOVERED@{attempt_count}"
 
                 print(f"Run {run} coverage: {coverage_result}")
-                semantic_passed = evaluate_semantic_result(
+                status_passed, evidence_sources_passed = evaluate_semantic_result(
                     case,
                     state["match_result"],
                 )
 
-            if semantic_passed:
+            strict_semantic_passed = (
+                status_passed and evidence_sources_passed
+            )
+
+            print(f"Status: {'PASS' if status_passed else 'FAIL'}")
+            print(
+                "Evidence sources: "
+                f"{'PASS' if evidence_sources_passed else 'FAIL'}"
+            )
+            print(
+                "Strict semantic result: "
+                f"{'PASS' if strict_semantic_passed else 'FAIL'}"
+            )
+
+            if strict_semantic_passed:
                 case_passes += 1
-                print(f"Run {run} semantic result: PASS")
-            else:
-                print(f"Run {run} semantic result: FAIL")
 
             run_results.append(
                 {
                     "attempt_count": attempt_count,
                     "retries_exhausted": exhausted,
-                    "semantic_passed": semantic_passed,
+                    "status_passed": status_passed,
+                    "evidence_sources_passed": evidence_sources_passed,
                 }
             )
 
         consistency = case_passes / RUNS_PER_CASE * 100
         print(
-            f"Semantic consistency: {case_passes}/{RUNS_PER_CASE} "
+            f"Strict semantic consistency: {case_passes}/{RUNS_PER_CASE} "
             f"({consistency:.0f}%)"
         )
         case_summary.append(
@@ -221,11 +257,27 @@ def main():
         )
     )
     print(
-        "Final semantic accuracy: "
+        "Status accuracy: "
         + format_metric(
-            metrics["semantic_pass_count"],
+            metrics["status_pass_count"],
             total_runs,
-            metrics["semantic_accuracy_percent"],
+            metrics["status_accuracy_percent"],
+        )
+    )
+    print(
+        "Evidence-source accuracy: "
+        + format_metric(
+            metrics["evidence_source_pass_count"],
+            total_runs,
+            metrics["evidence_source_accuracy_percent"],
+        )
+    )
+    print(
+        "Strict semantic accuracy: "
+        + format_metric(
+            metrics["strict_semantic_pass_count"],
+            total_runs,
+            metrics["strict_semantic_accuracy_percent"],
         )
     )
 
