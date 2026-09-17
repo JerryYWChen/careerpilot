@@ -19,11 +19,13 @@ flowchart TD
     B --> C[LLM Evidence Matching]
     C --> D[Deterministic Coverage Validation]
     D -- Invalid + feedback, max 3 attempts --> C
-    D -- Valid --> E[Deterministic Scoring + Gap Analysis]
-    E --> F[LLM Career Action Plan]
-    F --> G[Deterministic Plan Validation]
-    G -- Invalid + feedback, max 3 attempts --> F
-    G -- Valid --> H[Structured Analysis Result]
+    D -- Valid --> E[Deterministic Scoring + Qualification Gaps]
+    E --> F[Per-Gap Retrieval]
+    F --> G[Retrieved Context]
+    G --> H[LLM Career Action Plan]
+    H --> I[Deterministic Plan Validation]
+    I -- Invalid + feedback, max 3 attempts --> H
+    I -- Valid --> J[Structured Analysis Result]
 ```
 
 The LLM handles semantic interpretation and generation. Python owns known rules: requirement coverage, plan validity, retry limits, and weighted scoring. LangGraph coordinates the two validation-and-repair loops without controlling the entire analysis pipeline.
@@ -52,15 +54,17 @@ Frozen results: [match-v1](backend/evals/results/match-v1-baseline.md) · [match
 - Validation feedback drives bounded repair attempts through LangGraph.
 - Python calculates the weighted score; the model never invents a percentage.
 - Versioned prompts and a regression suite make semantic changes measurable.
+- RAG-grounded planning indexes Markdown with deterministic heading-aware, overlapping chunks, stores their embeddings in SQLite, and retrieves semantic Top-K context from deterministic gap queries using cosine similarity.
+- Retrieved knowledge informs plan generation without becoming candidate resume evidence; retrieval fails open to the original planner behavior.
 
 ## Tech stack
 
 | Layer | Technologies |
 | --- | --- |
 | Backend | Python, FastAPI, Pydantic, SQLAlchemy |
-| AI workflow | OpenAI API, LangGraph |
+| AI workflow | OpenAI API, LangGraph, RAG |
 | Frontend | React, TypeScript, Vite |
-| Storage and documents | SQLite, pypdf |
+| Storage and documents | SQLite, Markdown, pypdf |
 | Quality | pytest, frozen matching evaluations |
 
 ## Run locally
