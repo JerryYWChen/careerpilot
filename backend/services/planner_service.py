@@ -1,4 +1,5 @@
 from backend.models.analysis import CareerActionPlan, Gap
+from backend.rag.planning_context import retrieve_planning_context
 from backend.services.ai_service import generate_career_action_plan
 
 def validate_career_action_plan(
@@ -92,9 +93,12 @@ def create_validated_career_action_plan(
 
     from backend.agents.planning_graph import career_plan_graph
 
+    retrieved_context = retrieve_planning_context(gaps)
+
     result = career_plan_graph.invoke(
         {
             "gaps": gaps,
+            "retrieved_context": retrieved_context,
             "career_action_plan": None,
             "validation_feedback": None,
             "attempt_count": 0,

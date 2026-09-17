@@ -3,6 +3,7 @@ from typing import TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from backend.models.analysis import CareerActionPlan, Gap
+from backend.rag.models import PlanKnowledgeChunk
 from backend.services import planner_service
 
 
@@ -11,6 +12,7 @@ MAX_PLAN_ATTEMPTS = 3
 
 class CareerPlanState(TypedDict):
     gaps: list[Gap]
+    retrieved_context: list[PlanKnowledgeChunk]
     career_action_plan: CareerActionPlan | None
     validation_feedback: str | None
     attempt_count: int
@@ -20,6 +22,7 @@ def generate_plan_node(state: CareerPlanState):
     plan = planner_service.generate_career_action_plan(
         state["gaps"],
         validation_feedback=state["validation_feedback"],
+        retrieved_context=state["retrieved_context"],
     )
 
     return {
