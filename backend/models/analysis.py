@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -39,6 +40,7 @@ class MatchStatus(str, Enum):
     MATCHED = "matched"
     PARTIAL = "partial"
     MISSING = "missing"
+    NOT_ASSESSABLE = "not_assessable"
 
 class EvidenceSource(str, Enum):
     SKILLS = "skills"
@@ -71,9 +73,16 @@ class Gap(BaseModel):
     reason: str
 
 
+class NotAssessableRequirement(BaseModel):
+    area: str
+    status: Literal[MatchStatus.NOT_ASSESSABLE] = MatchStatus.NOT_ASSESSABLE
+    reason: str
+
+
 class MatchAnalysis(BaseModel):
     strengths: list[Strength]
     gaps: list[Gap]
+    not_assessable: list[NotAssessableRequirement]
 
 class ResumeHighlights(BaseModel):
     highlights: list[str]

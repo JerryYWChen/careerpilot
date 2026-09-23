@@ -138,6 +138,7 @@ async def analyze_resume(resume_id: int, request: AnalyzeRequest, db: Session = 
         "match_score": match_score,
         "strengths": match_analysis.strengths,
         "gaps": match_analysis.gaps,
+        "not_assessable": match_analysis.not_assessable,
         "resume_highlights": resume_highlights,
         "career_action_plan": career_action_plan,
     }

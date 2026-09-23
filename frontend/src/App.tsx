@@ -17,6 +17,11 @@ type AnalysisResult = {
     evidence: string | null
     reason: string
   }[]
+  not_assessable: {
+    area: string
+    status: 'not_assessable'
+    reason: string
+  }[]
   career_action_plan: {
     actions: {
       title: string
@@ -255,6 +260,38 @@ function App() {
               )}
             </article>
           </div>
+
+          {analysis.not_assessable.length > 0 && (
+            <article className="panel result-card not-assessable-card">
+              <div className="result-card-heading">
+                <div>
+                  <p className="eyebrow neutral">Resume evidence limitation</p>
+                  <h3>Not Assessable from Resume</h3>
+                </div>
+                <span className="count-badge neutral">
+                  {analysis.not_assessable.length}
+                </span>
+              </div>
+              <p className="not-assessable-explanation">
+                Lack of resume evidence for these requirements does not imply a
+                lack of capability.
+              </p>
+              <ul className="result-list">
+                {analysis.not_assessable.map((item) => (
+                  <li key={item.area}>
+                    <span className="status-icon not-assessable" aria-hidden="true">?</span>
+                    <div>
+                      <div className="gap-title-row">
+                        <h4>{item.area}</h4>
+                        <span className="status-label not-assessable">not assessable</span>
+                      </div>
+                      <p>{item.reason}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          )}
 
           <article className="panel plan-card">
             <div className="result-card-heading">

@@ -9,7 +9,7 @@ load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 MODEL_NAME = "gpt-5.6-luna"
-MATCH_PROMPT_VERSION = "match-v2"
+MATCH_PROMPT_VERSION = "match-v3"
 PLAN_PROMPT_VERSION = "plan-v1"
 
 MATCH_V1_SYSTEM_PROMPT = (
@@ -114,9 +114,62 @@ MATCH_V2_SYSTEM_PROMPT = (
     "reliably implies the required capability."
 )
 
+MATCH_V3_SYSTEM_PROMPT = MATCH_V2_SYSTEM_PROMPT + (
+    " Before evaluating the strength of the evidence, first decide whether the "
+    "requirement itself can be reliably evaluated from resume evidence. Ask: "
+    "would a well-written resume reasonably be expected to contain evidence "
+    "sufficient to evaluate this specific requirement? Make this semantic "
+    "decision from what the requirement actually asks, not from a fixed list of "
+    "soft-skill keywords. "
+
+    "Resume-assessable requirements include named technologies and technical "
+    "skills, concrete technical capabilities, concrete responsibilities and work "
+    "activities, work history, duration of experience, education, credentials, "
+    "certifications, and concrete hardware or software experience. Evaluate these "
+    "with the existing matched, partial, and missing rules. Strong contextual "
+    "evidence remains valid when concrete implementation work reliably implies a "
+    "technical or concrete capability. Do not use 'not_assessable' merely because "
+    "evidence for a resume-assessable requirement is absent. "
+
+    "Subjective behavioral or qualitative requirements are different. When a "
+    "requirement asks for the quality of communication, collaboration, teamwork, "
+    "interpersonal skill, leadership, problem solving, attention to detail, or "
+    "multitasking effectiveness, activities related to that trait do not by "
+    "themselves reliably establish the quality. Authoring documentation does not "
+    "by itself establish excellent written communication; validation or debugging "
+    "work does not by itself establish high attention to detail; cross-functional "
+    "work does not by itself establish strong collaboration; presenting results "
+    "does not by itself establish excellent verbal communication; and leading a "
+    "team does not by itself establish strong leadership ability. If the subjective "
+    "quality cannot be reliably evaluated from the resume, classify it as "
+    "'not_assessable', even when the resume contains a related activity. "
+    "Use matched or partial for a subjective quality only when unusually direct, "
+    "reliable resume evidence establishes the quality itself rather than merely an "
+    "activity associated with it. "
+
+    "Distinguish subjective quality from concrete behavior. Experience presenting "
+    "technical results, collaborating with named functions, producing technical "
+    "documentation, leading a stated number of people, or building and debugging "
+    "developer tooling is resume-assessable when that concrete behavior is the "
+    "requirement. Words such as communication, collaboration, leadership, ability, "
+    "or teamwork must not automatically determine assessability. "
+
+    "Candidate intent, availability, and logistics are also 'not_assessable' when "
+    "the resume does not reliably establish them, including willingness to work "
+    "onsite, relocate, travel, work a particular schedule, or remain available for "
+    "a full internship. "
+
+    "For 'not_assessable', lack of resume evidence must not be described as lack of "
+    "capability. Return no evidence and no evidence_sources, and explain that resume "
+    "evidence cannot reliably assess or establish the requirement. Do not use "
+    "'partial' merely because the resume shows an activity related to a subjective "
+    "quality; partial still requires reliable evidence of the requirement itself."
+)
+
 MATCH_SYSTEM_PROMPTS = {
     "match-v1": MATCH_V1_SYSTEM_PROMPT,
     "match-v2": MATCH_V2_SYSTEM_PROMPT,
+    "match-v3": MATCH_V3_SYSTEM_PROMPT,
 }
 
 def analyze_job_description(job_description: str) -> JobRequirements:

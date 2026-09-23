@@ -1,8 +1,11 @@
+import re
+
 from backend.models.analysis import (
     Gap,
     JobRequirements,
     MatchAnalysis,
     MatchStatus,
+    NotAssessableRequirement,
     Requirement,
     RequirementImportance,
     RequirementMatch,
@@ -20,6 +23,19 @@ IMPORTANCE_WEIGHTS = {
     RequirementImportance.REQUIRED: 3,
     RequirementImportance.PREFERRED: 1,
 }
+
+_EVIDENCE_LIMITATION_LANGUAGE = re.compile(
+    r"\b(resume|evidence)\b.*\b(assess|assessable|evaluate|establish|"
+    r"demonstrate|determine|insufficient|reliably)\b|"
+    r"\b(assess|assessable|evaluate|establish|demonstrate|determine|"
+    r"insufficient|reliably)\b.*\b(resume|evidence)\b",
+    flags=re.IGNORECASE,
+)
+_UNSUPPORTED_CAPABILITY_ABSENCE = re.compile(
+    r"\b(?:candidate|applicant)\s+(?:lacks|does not have|doesn't have|"
+    r"has no|is unable to)\b",
+    flags=re.IGNORECASE,
+)
 
 def validate_resume_match_result(
     match_result: ResumeMatchResult,
@@ -66,6 +82,38 @@ def validate_resume_match_result(
     if unknown:
         errors.append(f"Unknown matches: {unknown}.")
 
+    for match in match_result.matches:
+        has_evidence = bool(match.evidence and match.evidence.strip())
+        has_sources = bool(match.evidence_sources)
+
+        if match.status in {MatchStatus.MATCHED, MatchStatus.PARTIAL}:
+            if not has_evidence or not has_sources:
+                errors.append(
+                    f"{match.status.value} match for '{match.requirement_name}' "
+                    "must include positive resume evidence and evidence sources."
+                )
+
+        if match.status in {
+            MatchStatus.MISSING,
+            MatchStatus.NOT_ASSESSABLE,
+        } and (has_evidence or has_sources):
+            errors.append(
+                f"{match.status.value} match for '{match.requirement_name}' "
+                "must not claim positive resume evidence or evidence sources."
+            )
+
+        if match.status == MatchStatus.NOT_ASSESSABLE:
+            if not _EVIDENCE_LIMITATION_LANGUAGE.search(match.reason):
+                errors.append(
+                    f"not_assessable reason for '{match.requirement_name}' must "
+                    "describe the limitation of evaluating it from resume evidence."
+                )
+            if _UNSUPPORTED_CAPABILITY_ABSENCE.search(match.reason):
+                errors.append(
+                    f"not_assessable reason for '{match.requirement_name}' must "
+                    "not claim that the candidate lacks the capability."
+                )
+
     if errors:
         raise ValueError(" ".join(errors))
 
@@ -92,6 +140,9 @@ def calculate_match_score(
     for requirement in requirements.requirements:
         match = find_match(requirement, match_result)
 
+        if match.status == MatchStatus.NOT_ASSESSABLE:
+            continue
+
         match_value = MATCH_VALUES[match.status]
         importance_weight = IMPORTANCE_WEIGHTS[requirement.importance]
 
@@ -109,6 +160,7 @@ def calculate_match_score(
 def build_match_analysis(match_result: ResumeMatchResult) -> MatchAnalysis:
     strengths = []
     gaps = []
+    not_assessable = []
 
     for match in match_result.matches:
         if match.status == MatchStatus.MATCHED:
@@ -119,7 +171,7 @@ def build_match_analysis(match_result: ResumeMatchResult) -> MatchAnalysis:
                     reason=match.reason
                 )
             )
-        else:
+        elif match.status in {MatchStatus.PARTIAL, MatchStatus.MISSING}:
             gaps.append(
                 Gap(
                     area=match.requirement_name,
@@ -128,9 +180,19 @@ def build_match_analysis(match_result: ResumeMatchResult) -> MatchAnalysis:
                     reason=match.reason
                 )
             )
+        elif match.status == MatchStatus.NOT_ASSESSABLE:
+            not_assessable.append(
+                NotAssessableRequirement(
+                    area=match.requirement_name,
+                    reason=match.reason,
+                )
+            )
+        else:
+            raise ValueError(f"Unsupported match status: {match.status}")
 
     return MatchAnalysis(
         strengths=strengths,
-        gaps=gaps
+        gaps=gaps,
+        not_assessable=not_assessable,
     )
 

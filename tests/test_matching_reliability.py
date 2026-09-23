@@ -16,6 +16,7 @@ from backend.services.ai_service import (
     MATCH_SYSTEM_PROMPTS,
     MATCH_V1_SYSTEM_PROMPT,
     MATCH_V2_SYSTEM_PROMPT,
+    MATCH_V3_SYSTEM_PROMPT,
     MODEL_NAME,
     match_resume_to_requirements,
 )
@@ -136,16 +137,22 @@ def test_validation_feedback_is_included_in_retry_prompt():
     user_prompt = mock_parse.call_args.kwargs["input"][1]["content"]
     system_prompt = mock_parse.call_args.kwargs["input"][0]["content"]
     assert mock_parse.call_args.kwargs["model"] == MODEL_NAME
-    assert system_prompt == MATCH_V2_SYSTEM_PROMPT
+    assert system_prompt == MATCH_V3_SYSTEM_PROMPT
     assert "A previous match result failed validation." in user_prompt
     assert "Validation error: Unknown matches: ['Docker']." in user_prompt
 
 
-def test_match_v1_prompt_is_preserved_while_match_v2_is_active():
-    assert MATCH_PROMPT_VERSION == "match-v2"
+def test_historical_prompts_are_preserved_while_match_v3_is_active():
+    assert MATCH_PROMPT_VERSION == "match-v3"
     assert MATCH_SYSTEM_PROMPTS["match-v1"] == MATCH_V1_SYSTEM_PROMPT
     assert MATCH_SYSTEM_PROMPTS["match-v2"] == MATCH_V2_SYSTEM_PROMPT
-    assert MATCH_V1_SYSTEM_PROMPT != MATCH_V2_SYSTEM_PROMPT
+    assert MATCH_SYSTEM_PROMPTS["match-v3"] == MATCH_V3_SYSTEM_PROMPT
+    assert len(
+        {MATCH_V1_SYSTEM_PROMPT, MATCH_V2_SYSTEM_PROMPT, MATCH_V3_SYSTEM_PROMPT}
+    ) == 3
+    assert "not_assessable" not in MATCH_V1_SYSTEM_PROMPT
+    assert "not_assessable" not in MATCH_V2_SYSTEM_PROMPT
+    assert "not_assessable" in MATCH_V3_SYSTEM_PROMPT
 
 
 def test_langgraph_returns_valid_result_without_retry():
