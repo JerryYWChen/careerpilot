@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
 
 
 @dataclass(frozen=True)
@@ -9,6 +11,33 @@ class KnowledgeDocument:
     source_url: str | None
     file_path: str
     content_hash: str
+    source_type: str = "manual"
+    retrieved_at: datetime | None = None
+    last_checked_at: datetime | None = None
+
+
+@dataclass(frozen=True)
+class NormalizedKnowledgeSource:
+    title: str
+    canonical_url: str
+    source_type: str
+    retrieved_at: datetime
+    last_checked_at: datetime
+    content: str
+    content_hash: str
+
+
+class IngestionStatus(str, Enum):
+    INSERTED = "inserted"
+    UNCHANGED = "unchanged"
+    REPLACED = "replaced"
+
+
+@dataclass(frozen=True)
+class IngestionResult:
+    document_id: str
+    status: IngestionStatus
+    chunk_count: int
 
 
 @dataclass(frozen=True)

@@ -1,6 +1,8 @@
 from types import SimpleNamespace
 from unittest.mock import call, patch
 
+import pytest
+
 from backend.models.analysis import CareerActionPlan, Gap, MatchStatus
 from backend.rag.models import PlanKnowledgeChunk, RetrievalResult
 from backend.rag.planning_context import (
@@ -9,7 +11,14 @@ from backend.rag.planning_context import (
     build_gap_retrieval_query,
     retrieve_planning_context,
 )
+from backend.rag.retrieve import DEFAULT_DATABASE_PATH
 from backend.services.ai_service import generate_career_action_plan
+
+
+@pytest.fixture(autouse=True)
+def disable_live_web_acquisition():
+    with patch("backend.rag.planning_context.acquire_gap_source_from_web"):
+        yield
 
 
 def _gap(area: str, evidence: str | None = None) -> Gap:
@@ -60,8 +69,18 @@ def test_retrieve_planning_context_retrieves_top_three_per_gap() -> None:
         context = retrieve_planning_context(gaps)
 
     assert mock_retrieve.call_args_list == [
-        call(build_gap_retrieval_query(gaps[0]), top_k=3),
-        call(build_gap_retrieval_query(gaps[1]), top_k=3),
+        call(
+            build_gap_retrieval_query(gaps[0]),
+            database_path=DEFAULT_DATABASE_PATH,
+            top_k=3,
+            client=None,
+        ),
+        call(
+            build_gap_retrieval_query(gaps[1]),
+            database_path=DEFAULT_DATABASE_PATH,
+            top_k=3,
+            client=None,
+        ),
     ]
     assert [chunk.chunk_id for chunk in context] == [
         "k1",

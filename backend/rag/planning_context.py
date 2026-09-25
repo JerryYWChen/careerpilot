@@ -1,12 +1,22 @@
+import logging
+from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 from backend.models.analysis import Gap
+from backend.rag.acquisition import acquire_gap_source_from_web
 from backend.rag.models import PlanKnowledgeChunk, RetrievalResult
-from backend.rag.retrieve import retrieve_chunks
+from backend.rag.retrieve import DEFAULT_DATABASE_PATH, retrieve_chunks
+from backend.rag.web_models import AcquisitionResult
 
 
 TOP_K_PER_GAP = 3
 MAX_CONTEXT_CHUNKS = 8
+MAX_ACQUISITION_ATTEMPTS_PER_PLAN = 2
+
+
+GapAcquisitionFunction = Callable[[Gap], AcquisitionResult]
+logger = logging.getLogger("uvicorn.error")
 
 
 @dataclass(frozen=True)
@@ -87,23 +97,90 @@ def aggregate_gap_retrievals(
     return [selected[chunk_id] for chunk_id in selected_order]
 
 
-def retrieve_planning_context(gaps: list[Gap]) -> list[PlanKnowledgeChunk]:
+def retrieve_planning_context(
+    gaps: list[Gap],
+    *,
+    database_path: Path = DEFAULT_DATABASE_PATH,
+    embedding_client=None,
+    acquire_gap: GapAcquisitionFunction | None = None,
+) -> list[PlanKnowledgeChunk]:
     gap_retrievals: list[GapRetrieval] = []
+    acquisition_attempts = 0
+
+    if acquire_gap is None:
+        acquire_gap = lambda gap: acquire_gap_source_from_web(
+            gap,
+            database_path=database_path,
+            embedding_client=embedding_client,
+        )
 
     try:
         for gap in gaps:
+            logger.info("[RAG] Gap: %s", gap.area)
+
+            if acquisition_attempts < MAX_ACQUISITION_ATTEMPTS_PER_PLAN:
+                acquisition_attempts += 1
+                logger.info("[RAG] Web acquisition: attempted")
+                logger.info(
+                    "[RAG] Acquisition attempt: %s/%s",
+                    acquisition_attempts,
+                    MAX_ACQUISITION_ATTEMPTS_PER_PLAN,
+                )
+                try:
+                    acquisition_result = acquire_gap(gap)
+                    logger.info(
+                        "[RAG] Search query: %s",
+                        acquisition_result.query,
+                    )
+                    if acquisition_result.selected_url:
+                        logger.info(
+                            "[RAG] Selected source: %s",
+                            acquisition_result.selected_url,
+                        )
+                    logger.info(
+                        "[RAG] Acquisition status: %s",
+                        acquisition_result.status.value,
+                    )
+                    if acquisition_result.ingestion_result is not None:
+                        logger.info(
+                            "[RAG] Ingestion status: %s",
+                            acquisition_result.ingestion_result.status.value,
+                        )
+                except Exception as error:
+                    logger.warning(
+                        "[RAG] Acquisition status: error (%s)",
+                        type(error).__name__,
+                    )
+            else:
+                logger.info(
+                    "[RAG] Web acquisition: skipped (plan-wide limit reached)"
+                )
+
             query = build_gap_retrieval_query(gap)
+            retrieval_results = retrieve_chunks(
+                query,
+                database_path=database_path,
+                top_k=TOP_K_PER_GAP,
+                client=embedding_client,
+            )
+            logger.info("[RAG] Retrieval results: %s", len(retrieval_results))
             gap_retrievals.append(
                 GapRetrieval(
                     gap_area=gap.area,
                     query=query,
-                    results=retrieve_chunks(
-                        query,
-                        top_k=TOP_K_PER_GAP,
-                    ),
+                    results=retrieval_results,
                 )
             )
-    except Exception:
+    except Exception as error:
+        logger.warning(
+            "[RAG] Retrieval failed for gap %s (%s)",
+            gap.area,
+            type(error).__name__,
+        )
+        logger.info("[RAG] Retrieval results: 0")
+        logger.info("[RAG] Planning context chunks: 0")
         return []
 
-    return aggregate_gap_retrievals(gap_retrievals)
+    planning_context = aggregate_gap_retrievals(gap_retrievals)
+    logger.info("[RAG] Planning context chunks: %s", len(planning_context))
+    return planning_context
