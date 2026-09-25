@@ -12,9 +12,17 @@ The planner is grounded with a local retrieval-augmented generation (RAG) system
 
 ## Product preview
 
-The analysis view compares a resume with a target role, separates supported qualifications from qualification gaps, and labels each requirement as matched, partial, or missing. Each decision includes its supporting resume evidence, while the overall deterministic match score summarizes requirement coverage.
+### Resume-to-job analysis
+
+CareerPilot separates supported qualifications from gaps, labels requirements as matched, partial, or missing, and shows the resume evidence behind each decision alongside the deterministic match score.
 
 ![CareerPilot resume-to-job analysis showing supported qualifications, gaps, evidence, and deterministic match score](docs/assets/careerpilot-analysis.png)
+
+### Career Action Plan
+
+The identified gaps become prioritized, concrete next steps. Each action shows the qualifications it addresses and, where applicable, how it builds on earlier work.
+
+![CareerPilot Career Action Plan showing prioritized, gap-focused recommendations and sequencing](docs/assets/careerpilot-action-plan.png)
 
 ## How it works
 
