@@ -1,0 +1,741 @@
+Model: gpt-5.6-luna
+Match prompt: match-v1
+
+=== Mixed Evidence ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Insufficient Years ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Strong Direct Evidence ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== No Evidence ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Insufficient Context Without Exact Keyword ===
+Run 1 coverage: RECOVERED@2
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+  FAIL: Python
+    expected status: missing
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.PROJECTS: 'projects'>]
+    evidence: The resume describes machine learning projects involving deep learning model development, LLM evaluation, and training and evaluation workflows, but it does not explicitly mention Python.
+    reason:   These projects are relevant to machine learning engineering, but they do not reliably establish Python experience without an explicit Python reference.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Strict semantic consistency: 2/3 (67%)
+
+=== Framework Context Supports Language ===
+Run 1 coverage: PASS@1
+  FAIL: JavaScript
+    expected status: partial
+    actual status:   matched
+    evidence: The resume lists React and Redux as skills and describes building a responsive dashboard with React and Redux, including reusable components and client-side state management. These technologies and implementation work provide strong contextual evidence of JavaScript experience.
+    reason:   JavaScript is not explicitly listed, but practical work with React and Redux reliably demonstrates experience in the JavaScript frontend ecosystem. No minimum duration is specified.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+  FAIL: JavaScript
+    expected status: partial
+    actual status:   matched
+    evidence: The resume lists React and Redux as skills and describes building a responsive dashboard with React and Redux, including reusable components and client-side state management. React and Redux are JavaScript technologies, providing strong contextual evidence of JavaScript development.
+    reason:   Although JavaScript is not explicitly listed, the documented hands-on use of React and Redux reliably demonstrates experience developing with JavaScript.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+  FAIL: JavaScript
+    expected status: partial
+    actual status:   matched
+    evidence: The resume lists React and Redux as skills and describes building a responsive dashboard with React and Redux, including reusable components and client-side state management. These technologies and implementation work provide strong contextual evidence of JavaScript experience.
+    reason:   JavaScript is not explicitly listed, but React and Redux are JavaScript technologies, and the project demonstrates practical frontend implementation using them.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Strict semantic consistency: 0/3 (0%)
+
+=== Backend Framework Context Supports Language ===
+Run 1 coverage: PASS@1
+  FAIL: Python
+    expected status: partial
+    actual status:   matched
+    evidence: The resume lists FastAPI and SQLAlchemy as backend skills and states that the candidate built REST APIs, database models, API endpoints, and CRUD operations with FastAPI and SQLAlchemy. These technologies are Python-based, providing strong contextual evidence of Python experience.
+    reason:   The combination of FastAPI and SQLAlchemy with implemented backend APIs and database functionality reliably demonstrates practical Python backend development experience, even though Python is not explicitly listed.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+  FAIL: Python
+    expected status: partial
+    actual status:   matched
+    evidence: The resume lists FastAPI and SQLAlchemy as backend skills and states that the candidate built REST APIs, database models, API endpoints, and CRUD operations with these technologies. FastAPI and SQLAlchemy are Python-based technologies, providing strong contextual evidence of Python development experience.
+    reason:   The combination of FastAPI and SQLAlchemy with hands-on REST API and database implementation reliably demonstrates Python backend development, even though Python is not explicitly listed by name.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+  FAIL: Python
+    expected status: partial
+    actual status:   matched
+    evidence: The resume lists FastAPI and SQLAlchemy as backend skills and states that the candidate built REST APIs, database models, API endpoints, and CRUD operations with FastAPI and SQLAlchemy. These technologies are Python-based, providing strong contextual evidence of Python backend development.
+    reason:   The resume does not explicitly list Python, but the combination of FastAPI and SQLAlchemy with concrete backend implementation work reliably demonstrates Python experience.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Strict semantic consistency: 0/3 (0%)
+
+=== Concrete Tool Evidence Supports Broader Concept ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Skills Plus Strong Context ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Next.js Does Not Reliably Establish TypeScript ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Container Experience Without Orchestration ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Compound AND Requirement Partially Satisfied ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Compound OR Requirement Satisfied ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== AWS Platform and Lambda Are Separate Requirements ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Experience Exactly Meets Minimum ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+  FAIL: Python experience
+    expected sources: [<EvidenceSource.SKILLS: 'skills'>, <EvidenceSource.EXPERIENCE: 'experience'>]
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Worked as a Python Backend Engineer from January 2022 to January 2025, building and maintaining production Python APIs throughout the role, providing three years of Python experience.
+    reason:   The resume directly documents three years of production Python backend experience, meeting the required minimum of three years.
+Status: PASS
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+  FAIL: Python experience
+    expected sources: [<EvidenceSource.SKILLS: 'skills'>, <EvidenceSource.EXPERIENCE: 'experience'>]
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Worked as a Python Backend Engineer from January 2022 to January 2025, building and maintaining production Python APIs throughout the role, which demonstrates three years of Python experience.
+    reason:   The resume directly documents three years of production Python backend experience, meeting the required minimum of three years.
+Status: PASS
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Strict semantic consistency: 1/3 (33%)
+
+=== Overlapping Experience Does Not Add Linearly ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Leadership Signals Without People Management ===
+Run 1 coverage: PASS@1
+  FAIL: People management experience
+    expected status: missing
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: The resume describes mentoring two junior engineers, leading architecture discussions, coordinating releases, presenting roadmaps, and serving as technical lead. However, it explicitly states this was an individual-contributor role with no direct reports and no responsibility for hiring, compensation, or performance reviews.
+    reason:   The mentoring and technical leadership demonstrate leadership-related experience, but the resume does not establish formal people management experience. The explicit absence of direct reports and core personnel responsibilities makes this insufficient for a required management-role qualification.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+  FAIL: People management experience
+    expected status: missing
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: The resume states that the candidate mentored two junior engineers and led architecture discussions, releases, roadmaps, and a migration. However, it explicitly states that this was an individual-contributor role with no direct reports and no responsibility for hiring, compensation, or performance reviews.
+    reason:   The mentoring and leadership responsibilities provide indirect, relevant experience, but the resume does not demonstrate formal people management experience. The explicit absence of direct reports and core management responsibilities prevents a matched classification.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+  FAIL: People management experience
+    expected status: missing
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: The resume states that the candidate mentored two junior engineers, coordinated releases, led architecture discussions, presented quarterly roadmaps, and served as technical lead for a migration. However, it explicitly states that this was an individual-contributor role with no direct reports and no responsibility for hiring, compensation, or performance reviews.
+    reason:   The mentoring and technical leadership demonstrate leadership-related experience, but the resume does not establish formal people management experience. The explicit absence of direct reports and core management responsibilities prevents a matched classification.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Strict semantic consistency: 0/3 (0%)
+
+=== Effective Verbal and Written Communication Is Not Assessable ===
+Run 1 coverage: RECOVERED@2
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+  FAIL: Effective verbal and written communication skills
+    expected status: not_assessable
+    actual status:   missing
+    evidence: None
+    reason:   The resume describes backend service development in Python and improvements to API performance and production reliability, but it provides no evidence of verbal or written communication skills.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+  FAIL: Effective verbal and written communication skills
+    expected status: not_assessable
+    actual status:   missing
+    evidence: None
+    reason:   The resume describes backend Python services, API performance, and production reliability, but provides no evidence of verbal or written communication skills.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Strict semantic consistency: 1/3 (33%)
+
+=== Generic Cross-Functional Collaboration Is Not Assessable ===
+Run 1 coverage: PASS@1
+  FAIL: Ability to collaborate cross-functionally
+    expected status: not_assessable
+    actual status:   missing
+    evidence: None
+    reason:   The resume describes image classification model development, evaluation, and automated model-training pipelines, but provides no evidence of collaboration with cross-functional teams or stakeholders.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+  FAIL: Ability to collaborate cross-functionally
+    expected status: not_assessable
+    actual status:   missing
+    evidence: None
+    reason:   The resume describes developing and evaluating image classification models and building automated model-training pipelines, but provides no evidence of collaboration with cross-functional teams or stakeholders.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Run 3 coverage: RECOVERED@3
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 1/3 (33%)
+
+=== Concrete Product and Design Collaboration Is Missing ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Validation and Debugging Do Not Establish High Attention to Detail ===
+Run 1 coverage: PASS@1
+  FAIL: High attention to detail
+    expected status: not_assessable
+    actual status:   matched
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Implemented schema validation, automated reconciliation, record-level integrity checks, and diagnosed intermittent data defects, reducing production reconciliation errors by 35%.
+    reason:   The resume provides strong direct evidence of careful data validation, defect diagnosis, and record-level quality control, which reliably demonstrates high attention to detail.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+  FAIL: High attention to detail
+    expected status: not_assessable
+    actual status:   matched
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Implemented schema validation, automated reconciliation, record-level integrity checks, and diagnosed intermittent data defects, reducing production reconciliation errors by 35%.
+    reason:   The resume provides strong practical evidence of meticulous data-quality work through validation, reconciliation, record-level checks, defect diagnosis, and a measurable reduction in errors.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+  FAIL: High attention to detail
+    expected status: not_assessable
+    actual status:   matched
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Implemented schema validation, automated reconciliation, record-level integrity checks, and diagnosed intermittent data defects, reducing production reconciliation errors by 35%.
+    reason:   The resume provides strong practical evidence of careful data quality work, including record-level validation, reconciliation, defect diagnosis, and measurable error reduction, which reliably demonstrates high attention to detail.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Strict semantic consistency: 0/3 (0%)
+
+=== Broad Software Work Does Not Establish Attention to Detail ===
+Run 1 coverage: PASS@1
+  FAIL: Attention to detail
+    expected status: not_assessable
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Built production web applications and backend APIs; maintained application features and participated in releases.
+    reason:   The resume demonstrates production software development and release-related work, which may involve careful implementation and maintenance, but it does not explicitly provide evidence of attention to detail or specific detail-oriented practices.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+  FAIL: Attention to detail
+    expected status: not_assessable
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: The resume states that the candidate built production web applications and backend APIs, maintained application features, and participated in releases. These responsibilities suggest software engineering work where accuracy may be relevant, but the resume does not explicitly demonstrate attention to detail through specific examples, quality practices, testing, defect reduction, or other concrete evidence.
+    reason:   Relevant production engineering responsibilities provide limited contextual support, but there is insufficient direct or concrete evidence to reliably establish attention to detail.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+  FAIL: Attention to detail
+    expected status: not_assessable
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: The resume states that the candidate built production web applications and backend APIs, maintained application features, and participated in releases. These responsibilities may involve careful implementation and release work, but the resume does not explicitly demonstrate attention to detail or provide concrete examples of detail-oriented outcomes.
+    reason:   Relevant software development and release responsibilities provide weak contextual support, but there is insufficient direct evidence to reliably establish attention to detail.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Strict semantic consistency: 0/3 (0%)
+
+=== Documentation Does Not Establish Excellent Communication Quality ===
+Run 1 coverage: PASS@1
+  FAIL: Excellent written and verbal communication
+    expected status: not_assessable
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Authored API documentation, deployment runbooks, and architecture decision records for internal engineering teams.
+    reason:   The resume provides direct evidence of strong written communication through technical documentation and written communication with engineering teams. However, it does not provide evidence of verbal communication or establish excellence in both written and verbal communication, so the requirement is only partially supported.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+  FAIL: Excellent written and verbal communication
+    expected status: not_assessable
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Authored API documentation, deployment runbooks, and architecture decision records for internal engineering teams.
+    reason:   The resume provides direct evidence of strong written communication through multiple forms of technical documentation. However, it does not provide evidence of verbal communication, so the full written-and-verbal requirement is only partially supported.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+  FAIL: Excellent written and verbal communication
+    expected status: not_assessable
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Authored API documentation, deployment runbooks, and architecture decision records for internal engineering teams, demonstrating written communication. The resume does not provide evidence of verbal communication or establish that communication was excellent.
+    reason:   The documented authorship of multiple technical materials supports written communication, but there is no evidence addressing verbal communication or the requirement's full level of excellence.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Strict semantic consistency: 0/3 (0%)
+
+=== Executive Presentation Is Directly Demonstrated ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Leadership Scope Is Directly Demonstrated ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Azure and Python Do Not Establish AWS ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Multitasking Effectiveness Is Not Assessable ===
+Run 1 coverage: PASS@1
+  FAIL: Ability to manage multiple tasks effectively
+    expected status: not_assessable
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: The resume states that the candidate built backend services, fixed production defects, and maintained deployment scripts, indicating involvement in multiple types of engineering work. However, it does not explicitly demonstrate prioritization, multitasking, or managing multiple tasks effectively.
+    reason:   Relevant evidence of handling varied responsibilities exists, but the resume does not reliably establish the specific ability to manage multiple tasks effectively.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+  FAIL: Ability to manage multiple tasks effectively
+    expected status: not_assessable
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Built backend services, fixed production defects, and maintained deployment scripts.
+    reason:   The resume lists several distinct responsibilities�backend development, production defect resolution, and deployment script maintenance�which suggests handling varied tasks. However, it does not explicitly demonstrate effective task prioritization, multitasking, workload management, or outcomes proving effectiveness.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+  FAIL: Ability to manage multiple tasks effectively
+    expected status: not_assessable
+    actual status:   partial
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: The resume states that the candidate built backend services, fixed production defects, and maintained deployment scripts, indicating involvement in multiple types of engineering work. However, it does not explicitly demonstrate the ability to manage multiple tasks effectively, such as through prioritization, concurrent project ownership, or task-management outcomes.
+    reason:   Relevant experience across several responsibilities provides indirect evidence, but the resume lacks explicit or concrete evidence of managing multiple tasks effectively.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Strict semantic consistency: 0/3 (0%)
+
+=== Cross-Functional Activity Does Not Establish Strong Collaboration ===
+Run 1 coverage: PASS@1
+  FAIL: Strong collaboration skills
+    expected status: not_assessable
+    actual status:   matched
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Worked with Product and Design to launch a customer onboarding workflow and coordinated API changes and user-interface requirements across teams.
+    reason:   The resume directly demonstrates collaboration with Product and Design and cross-team coordination involving API and user-interface requirements, providing strong practical evidence of collaboration skills.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+  FAIL: Strong collaboration skills
+    expected status: not_assessable
+    actual status:   matched
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Worked with Product and Design to launch a customer onboarding workflow and coordinated API changes and user-interface requirements across teams.
+    reason:   The resume directly demonstrates cross-functional collaboration with Product and Design, as well as coordination of API and user-interface requirements across teams.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+  FAIL: Strong collaboration skills
+    expected status: not_assessable
+    actual status:   matched
+    expected sources: []
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Worked with Product and Design to launch a customer onboarding workflow and coordinated API changes and user-interface requirements across teams.
+    reason:   The resume directly demonstrates cross-functional collaboration with Product and Design, as well as coordination of API and user-interface requirements across teams.
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Strict semantic consistency: 0/3 (0%)
+
+=== Product and Design Collaboration Experience Is Demonstrated ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Technical Documentation Experience Is Demonstrated ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Developer Tooling Capability Remains Resume Assessable ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Hardware and Switch Experience Remains Resume Assessable ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Onsite Internship Availability Remains Not Assessable ===
+Run 1 coverage: EXHAUSTED@3
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+  FAIL: Ability to work on-site in Azusa for the full internship
+    expected status: not_assessable
+    actual status:   missing
+    evidence: None
+    reason:   The resume only states that the candidate is a Computer Science Student and built a scheduling application using Python and SQLite. It provides no information about onsite availability in Azusa or the ability to commit to the full internship.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Run 3 coverage: EXHAUSTED@3
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Strict semantic consistency: 0/3 (0%)
+
+=== Evaluation Summary ===
+Mixed Evidence: 3/3 (100%)
+Insufficient Years: 3/3 (100%)
+Strong Direct Evidence: 3/3 (100%)
+No Evidence: 3/3 (100%)
+Insufficient Context Without Exact Keyword: 2/3 (67%)
+Framework Context Supports Language: 0/3 (0%)
+Backend Framework Context Supports Language: 0/3 (0%)
+Concrete Tool Evidence Supports Broader Concept: 3/3 (100%)
+Skills Plus Strong Context: 3/3 (100%)
+Next.js Does Not Reliably Establish TypeScript: 3/3 (100%)
+Container Experience Without Orchestration: 3/3 (100%)
+Compound AND Requirement Partially Satisfied: 3/3 (100%)
+Compound OR Requirement Satisfied: 3/3 (100%)
+AWS Platform and Lambda Are Separate Requirements: 3/3 (100%)
+Experience Exactly Meets Minimum: 1/3 (33%)
+Overlapping Experience Does Not Add Linearly: 3/3 (100%)
+Leadership Signals Without People Management: 0/3 (0%)
+Effective Verbal and Written Communication Is Not Assessable: 1/3 (33%)
+Generic Cross-Functional Collaboration Is Not Assessable: 1/3 (33%)
+Concrete Product and Design Collaboration Is Missing: 3/3 (100%)
+Validation and Debugging Do Not Establish High Attention to Detail: 0/3 (0%)
+Broad Software Work Does Not Establish Attention to Detail: 0/3 (0%)
+Documentation Does Not Establish Excellent Communication Quality: 0/3 (0%)
+Executive Presentation Is Directly Demonstrated: 3/3 (100%)
+Leadership Scope Is Directly Demonstrated: 3/3 (100%)
+Azure and Python Do Not Establish AWS: 3/3 (100%)
+Multitasking Effectiveness Is Not Assessable: 0/3 (0%)
+Cross-Functional Activity Does Not Establish Strong Collaboration: 0/3 (0%)
+Product and Design Collaboration Experience Is Demonstrated: 3/3 (100%)
+Technical Documentation Experience Is Demonstrated: 3/3 (100%)
+Developer Tooling Capability Remains Resume Assessable: 3/3 (100%)
+Hardware and Switch Experience Remains Resume Assessable: 3/3 (100%)
+Onsite Internship Availability Remains Not Assessable: 0/3 (0%)
+
+Total runs: 99
+
+Coverage pass@1: 94/99 (95.0%)
+Coverage pass@3: 97/99 (98.0%)
+Repair opportunities: 5
+Repair recoveries: 3/5 (60.0%)
+Retry exhaustion: 2/99 (2.0%)
+Status accuracy: 67/99 (67.7%)
+Evidence-source accuracy: 76/99 (76.8%)
+Strict semantic accuracy: 65/99 (65.7%)

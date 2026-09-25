@@ -13,6 +13,7 @@ MAX_MATCH_ATTEMPTS = 3
 class ResumeMatchingState(TypedDict):
     resume_text: str
     job_requirements: JobRequirements
+    prompt_version: str
     match_result: ResumeMatchResult | None
     validation_feedback: str | None
     attempt_count: int
@@ -24,6 +25,7 @@ def generate_match_node(state: ResumeMatchingState):
         state["resume_text"],
         state["job_requirements"],
         validation_feedback=state["validation_feedback"],
+        prompt_version=state["prompt_version"],
     )
 
     return {
@@ -82,11 +84,14 @@ resume_matching_graph = builder.compile()
 def run_resume_matching_workflow(
     resume_text: str,
     job_requirements: JobRequirements,
+    *,
+    prompt_version: str = ai_service.MATCH_PROMPT_VERSION,
 ) -> ResumeMatchingState:
     return resume_matching_graph.invoke(
         {
             "resume_text": resume_text,
             "job_requirements": job_requirements,
+            "prompt_version": prompt_version,
             "match_result": None,
             "validation_feedback": None,
             "attempt_count": 0,

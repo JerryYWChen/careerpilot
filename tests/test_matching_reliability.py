@@ -142,6 +142,53 @@ def test_validation_feedback_is_included_in_retry_prompt():
     assert "Validation error: Unknown matches: ['Docker']." in user_prompt
 
 
+def test_explicit_evaluation_prompt_does_not_change_production_default():
+    requirements = make_requirements("Python")
+    generated_result = ResumeMatchResult(matches=[make_match("Python")])
+
+    with patch(
+        "backend.services.ai_service.client.responses.parse",
+        return_value=SimpleNamespace(output_parsed=generated_result),
+    ) as mock_parse:
+        from backend.services.ai_service import _generate_resume_match_result
+
+        _generate_resume_match_result(
+            "Resume text",
+            requirements,
+            prompt_version="match-v1",
+        )
+
+    assert mock_parse.call_args.kwargs["input"][0]["content"] == (
+        MATCH_V1_SYSTEM_PROMPT
+    )
+    assert MATCH_PROMPT_VERSION == "match-v3"
+
+
+def test_matching_workflow_passes_explicit_prompt_through_retries():
+    requirements = make_requirements("Python", "Docker")
+    invalid_result = ResumeMatchResult(matches=[make_match("Python")])
+    valid_result = ResumeMatchResult(
+        matches=[make_match("Python"), make_match("Docker")]
+    )
+
+    with patch(
+        "backend.services.ai_service._generate_resume_match_result",
+        side_effect=[invalid_result, valid_result],
+    ) as mock_generate:
+        state = run_resume_matching_workflow(
+            "Resume text",
+            requirements,
+            prompt_version="match-v2",
+        )
+
+    assert state["match_result"] == valid_result
+    assert state["attempt_count"] == 2
+    assert all(
+        call.kwargs["prompt_version"] == "match-v2"
+        for call in mock_generate.call_args_list
+    )
+
+
 def test_historical_prompts_are_preserved_while_match_v3_is_active():
     assert MATCH_PROMPT_VERSION == "match-v3"
     assert MATCH_SYSTEM_PROMPTS["match-v1"] == MATCH_V1_SYSTEM_PROMPT

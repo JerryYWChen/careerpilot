@@ -1,0 +1,558 @@
+Model: gpt-5.6-luna
+Match prompt: match-v3
+
+=== Mixed Evidence ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Insufficient Years ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Strong Direct Evidence ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== No Evidence ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Insufficient Context Without Exact Keyword ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Framework Context Supports Language ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Backend Framework Context Supports Language ===
+Run 1 coverage: PASS@1
+  FAIL: Python
+    expected status: partial
+    actual status:   matched
+    evidence: Built REST APIs with FastAPI and SQLAlchemy; FastAPI is a Python web framework, and the project included implementing database models, API endpoints, and CRUD operations.
+    reason:   The resume explicitly lists FastAPI and describes concrete backend implementation work with it. This reliably demonstrates Python experience because FastAPI is a Python framework.
+Status: FAIL
+Evidence sources: PASS
+Strict semantic result: FAIL
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 2/3 (67%)
+
+=== Concrete Tool Evidence Supports Broader Concept ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Skills Plus Strong Context ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Next.js Does Not Reliably Establish TypeScript ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Container Experience Without Orchestration ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Compound AND Requirement Partially Satisfied ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Compound OR Requirement Satisfied ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== AWS Platform and Lambda Are Separate Requirements ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+  FAIL: AWS cloud experience
+    expected sources: [<EvidenceSource.SKILLS: 'skills'>, <EvidenceSource.EXPERIENCE: 'experience'>]
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Deployed applications to Amazon EC2 and stored assets in Amazon S3.
+    reason:   The resume directly demonstrates hands-on experience using AWS services, including EC2 and S3.
+Status: PASS
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 2/3 (67%)
+
+=== Experience Exactly Meets Minimum ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+  FAIL: Python experience
+    expected sources: [<EvidenceSource.SKILLS: 'skills'>, <EvidenceSource.EXPERIENCE: 'experience'>]
+    actual sources:   [<EvidenceSource.EXPERIENCE: 'experience'>]
+    evidence: Python Backend Engineer � January 2022 to January 2025; built and maintained production Python APIs throughout this role.
+    reason:   The resume documents three years of Python backend engineering experience from January 2022 through January 2025, satisfying the required minimum of three years.
+Status: PASS
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Strict semantic consistency: 2/3 (67%)
+
+=== Overlapping Experience Does Not Add Linearly ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Leadership Signals Without People Management ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Effective Verbal and Written Communication Is Not Assessable ===
+Run 1 coverage: RECOVERED@2
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: RECOVERED@2
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: RECOVERED@2
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Generic Cross-Functional Collaboration Is Not Assessable ===
+Run 1 coverage: RECOVERED@2
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: RECOVERED@2
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Concrete Product and Design Collaboration Is Missing ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Validation and Debugging Do Not Establish High Attention to Detail ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Broad Software Work Does Not Establish Attention to Detail ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Documentation Does Not Establish Excellent Communication Quality ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Executive Presentation Is Directly Demonstrated ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Leadership Scope Is Directly Demonstrated ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Azure and Python Do Not Establish AWS ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Multitasking Effectiveness Is Not Assessable ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Cross-Functional Activity Does Not Establish Strong Collaboration ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Product and Design Collaboration Experience Is Demonstrated ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Technical Documentation Experience Is Demonstrated ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Developer Tooling Capability Remains Resume Assessable ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Hardware and Switch Experience Remains Resume Assessable ===
+Run 1 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 2 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Run 3 coverage: PASS@1
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 3/3 (100%)
+
+=== Onsite Internship Availability Remains Not Assessable ===
+Run 1 coverage: EXHAUSTED@3
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 2 coverage: EXHAUSTED@3
+Status: FAIL
+Evidence sources: FAIL
+Strict semantic result: FAIL
+Run 3 coverage: RECOVERED@2
+Status: PASS
+Evidence sources: PASS
+Strict semantic result: PASS
+Strict semantic consistency: 1/3 (33%)
+
+=== Evaluation Summary ===
+Mixed Evidence: 3/3 (100%)
+Insufficient Years: 3/3 (100%)
+Strong Direct Evidence: 3/3 (100%)
+No Evidence: 3/3 (100%)
+Insufficient Context Without Exact Keyword: 3/3 (100%)
+Framework Context Supports Language: 3/3 (100%)
+Backend Framework Context Supports Language: 2/3 (67%)
+Concrete Tool Evidence Supports Broader Concept: 3/3 (100%)
+Skills Plus Strong Context: 3/3 (100%)
+Next.js Does Not Reliably Establish TypeScript: 3/3 (100%)
+Container Experience Without Orchestration: 3/3 (100%)
+Compound AND Requirement Partially Satisfied: 3/3 (100%)
+Compound OR Requirement Satisfied: 3/3 (100%)
+AWS Platform and Lambda Are Separate Requirements: 2/3 (67%)
+Experience Exactly Meets Minimum: 2/3 (67%)
+Overlapping Experience Does Not Add Linearly: 3/3 (100%)
+Leadership Signals Without People Management: 3/3 (100%)
+Effective Verbal and Written Communication Is Not Assessable: 3/3 (100%)
+Generic Cross-Functional Collaboration Is Not Assessable: 3/3 (100%)
+Concrete Product and Design Collaboration Is Missing: 3/3 (100%)
+Validation and Debugging Do Not Establish High Attention to Detail: 3/3 (100%)
+Broad Software Work Does Not Establish Attention to Detail: 3/3 (100%)
+Documentation Does Not Establish Excellent Communication Quality: 3/3 (100%)
+Executive Presentation Is Directly Demonstrated: 3/3 (100%)
+Leadership Scope Is Directly Demonstrated: 3/3 (100%)
+Azure and Python Do Not Establish AWS: 3/3 (100%)
+Multitasking Effectiveness Is Not Assessable: 3/3 (100%)
+Cross-Functional Activity Does Not Establish Strong Collaboration: 3/3 (100%)
+Product and Design Collaboration Experience Is Demonstrated: 3/3 (100%)
+Technical Documentation Experience Is Demonstrated: 3/3 (100%)
+Developer Tooling Capability Remains Resume Assessable: 3/3 (100%)
+Hardware and Switch Experience Remains Resume Assessable: 3/3 (100%)
+Onsite Internship Availability Remains Not Assessable: 1/3 (33%)
+
+Total runs: 99
+
+Coverage pass@1: 91/99 (91.9%)
+Coverage pass@3: 97/99 (98.0%)
+Repair opportunities: 8
+Repair recoveries: 6/8 (75.0%)
+Retry exhaustion: 2/99 (2.0%)
+Status accuracy: 96/99 (97.0%)
+Evidence-source accuracy: 95/99 (96.0%)
+Strict semantic accuracy: 94/99 (95.0%)

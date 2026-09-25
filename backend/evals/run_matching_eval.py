@@ -1,6 +1,12 @@
+import argparse
+
 from backend.agents.matching_graph import run_resume_matching_workflow
 from backend.evals.matching_cases import MATCHING_EVAL_CASES
-from backend.services.ai_service import MATCH_PROMPT_VERSION, MODEL_NAME
+from backend.services.ai_service import (
+    MATCH_PROMPT_VERSION,
+    MATCH_SYSTEM_PROMPTS,
+    MODEL_NAME,
+)
 
 
 RUNS_PER_CASE = 3
@@ -137,12 +143,12 @@ def format_metric(count: int, total: int, percent: float | None) -> str:
     return f"{count}/{total} ({percent:.1f}%)"
 
 
-def main():
+def main(prompt_version: str = MATCH_PROMPT_VERSION):
     case_summary = []
     run_results = []
 
     print(f"Model: {MODEL_NAME}")
-    print(f"Match prompt: {MATCH_PROMPT_VERSION}")
+    print(f"Match prompt: {prompt_version}")
 
     for case in MATCHING_EVAL_CASES:
         print(f"\n=== {case.name} ===")
@@ -152,6 +158,7 @@ def main():
             state = run_resume_matching_workflow(
                 case.resume_text,
                 case.job_requirements,
+                prompt_version=prompt_version,
             )
             attempt_count = state["attempt_count"]
             exhausted = state["retries_exhausted"]
@@ -224,6 +231,8 @@ def main():
     metrics = calculate_evaluation_metrics(run_results)
     total_runs = metrics["total_runs"]
 
+    print(f"\nTotal runs: {total_runs}")
+
     print(
         "\nCoverage pass@1: "
         + format_metric(
@@ -241,7 +250,11 @@ def main():
         )
     )
     print(
-        "Repair recovery: "
+        "Repair opportunities: "
+        f"{metrics['repair_opportunity_count']}"
+    )
+    print(
+        "Repair recoveries: "
         + format_metric(
             metrics["repair_recovery_count"],
             metrics["repair_opportunity_count"],
@@ -283,4 +296,17 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="Run the CareerPilot matching benchmark."
+    )
+    parser.add_argument(
+        "--prompt-version",
+        choices=sorted(MATCH_SYSTEM_PROMPTS),
+        default=MATCH_PROMPT_VERSION,
+        help=(
+            "Matching prompt to evaluate without changing the production "
+            f"default (default: {MATCH_PROMPT_VERSION})."
+        ),
+    )
+    args = parser.parse_args()
+    main(prompt_version=args.prompt_version)

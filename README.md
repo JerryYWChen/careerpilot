@@ -93,22 +93,27 @@ RAG knowledge persists across backend restarts. The current analysis response is
 
 The manifest indexer remains available for the Markdown files under `knowledge/`. Its full rebuild path replaces the contents of the RAG database, so running it after web acquisition can remove independently acquired web documents.
 
-## Measured matching reliability
+## Matching regression evaluation
 
-CareerPilot includes a frozen, policy-corrected benchmark of 17 matching cases, evaluated three times per case (51 runs). It is a project regression benchmark, not a claim of general resume-matching accuracy.
+CareerPilot preserves `match-v1`, `match-v2`, and `match-v3` and evaluates them against the current 33-case regression suite. Each version was run three times per case (99 runs per prompt) with `gpt-5.6-luna`, the same LangGraph workflow, and the same validation and retry behavior. `match-v3` remains the active production prompt.
 
-| Metric | match-v1 | match-v2 |
-| --- | ---: | ---: |
-| Structural coverage pass@1 | 100.0% | 100.0% |
-| Status accuracy | 84.3% | 94.1% |
-| Evidence-source accuracy | 78.4% | 84.3% |
-| Strict semantic accuracy | 74.5% | 82.3% |
+| Metric | match-v1 | match-v2 | match-v3 |
+| --- | ---: | ---: | ---: |
+| Coverage Pass@1 | 95.0% | 95.0% | 91.9% |
+| Coverage Pass@3 | 98.0% | 97.0% | 98.0% |
+| Status accuracy | 67.7% | 77.8% | 97.0% |
+| Evidence-source accuracy | 76.8% | 80.8% | 96.0% |
+| Strict semantic accuracy | 65.7% | 71.7% | 95.0% |
 
-![CareerPilot match-v1 and match-v2 benchmark comparison](docs/assets/matching-benchmark.svg)
+On this regression suite, `match-v3` aligns more consistently with CareerPilot's current matching policy than the historical prompts: strict semantic accuracy is 95.0% for v3, 71.7% for v2, and 65.7% for v1. From v2 to v3, 11 cases improved, 22 were unchanged, and none regressed. V3 has lower Coverage Pass@1 than v1 and v2, while the existing validation and retry loop recovers most structural failures and reaches 98.0% Pass@3.
 
-These are the frozen `match-v1` and `match-v2` results. The currently selected prompt is `match-v3`; this README does not attribute the older benchmark numbers to that prompt.
+**Methodological limitation:** this is a regression and policy-alignment evaluation, not an unbiased held-out benchmark. The matching policy and regression cases evolved alongside the prompts, including cases added or refined in response to previously observed failures. The results therefore measure how historical prompt versions behave against CareerPilot's current policy; they do not establish generalization to unseen cases or production accuracy.
 
-Frozen results: [match-v1](backend/evals/results/match-v1-baseline.md) · [match-v2](backend/evals/results/match-v2-benchmark.md)
+The regression suite is useful during iterative development because it captures known edge cases and helps prevent old failure modes from returning. A future generalization study should use a separate evaluation set that is frozen before further prompt tuning and is not used to modify the prompt before final evaluation.
+
+Results: [three-version comparison](backend/evals/results/match-v1-v2-v3-comparison-2026-09-24.md) · [v1 raw output](backend/evals/results/match-v1-three-version-comparison-raw.txt) · [v2 raw output](backend/evals/results/match-v2-three-version-comparison-raw.txt) · [v3 raw output](backend/evals/results/match-v3-three-version-comparison-raw.txt)
+
+Historical frozen snapshots: [match-v1](backend/evals/results/match-v1-baseline.md) · [match-v2](backend/evals/results/match-v2-benchmark.md)
 
 ## Engineering highlights
 

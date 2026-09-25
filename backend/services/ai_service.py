@@ -202,7 +202,15 @@ def _generate_resume_match_result(
     resume_text: str,
     job_requirements: JobRequirements,
     validation_feedback: str | None = None,
+    prompt_version: str = MATCH_PROMPT_VERSION,
 ) -> ResumeMatchResult:
+    try:
+        system_prompt = MATCH_SYSTEM_PROMPTS[prompt_version]
+    except KeyError as error:
+        raise ValueError(
+            f"Unknown matching prompt version: {prompt_version}"
+        ) from error
+
     feedback_text = ""
 
     if validation_feedback:
@@ -217,7 +225,7 @@ def _generate_resume_match_result(
         input=[
             {
                 "role": "system",
-                "content": MATCH_SYSTEM_PROMPTS[MATCH_PROMPT_VERSION],
+                "content": system_prompt,
             },
             {
                 "role": "user",
