@@ -103,6 +103,8 @@ RAG knowledge persists across backend restarts. The current analysis response is
 
 The manifest indexer remains available for the Markdown files under `knowledge/`. Its full rebuild path replaces the contents of the RAG database, so running it after web acquisition can remove independently acquired web documents.
 
+When CareerPilot runs through Docker Compose, `careerpilot.db` is stored separately in the external `careerpilot-data` volume. The current Compose configuration does not place `careerpilot_knowledge.db` in that volume; the RAG database remains in the backend container filesystem and does not survive container recreation.
+
 ## Matching regression evaluation
 
 CareerPilot preserves `match-v1`, `match-v2`, and `match-v3` and evaluates them against the current 33-case regression suite. Each version was run three times per case (99 runs per prompt) with `gpt-5.6-luna`, the same LangGraph workflow, and the same validation and retry behavior. `match-v3` remains the active production prompt.
@@ -146,15 +148,7 @@ Historical frozen snapshots: [match-v1](backend/evals/results/match-v1-baseline.
 | Storage and documents | SQLite, Markdown, pypdf |
 | Quality | pytest, frozen matching evaluations |
 
-## Run locally
-
-There is currently no backend dependency manifest, so install the packages imported by the repository directly. From the repository root:
-
-```bash
-python -m venv .venv
-# Activate .venv for your shell.
-pip install fastapi uvicorn sqlalchemy pydantic python-multipart pypdf openai python-dotenv langgraph httpx trafilatura pytest
-```
+## Environment variables
 
 Create `.env` in the repository root:
 
@@ -163,7 +157,107 @@ OPENAI_API_KEY=your_openai_api_key
 BRAVE_SEARCH_API_KEY=your_brave_search_api_key
 ```
 
-`OPENAI_API_KEY` is used for structured model calls and embeddings. `BRAVE_SEARCH_API_KEY` enables the concrete Brave `WebSearchProvider`; when acquisition fails or is unavailable, planning continues through the local fallback.
+`OPENAI_API_KEY` is required for structured model calls and embeddings. `BRAVE_SEARCH_API_KEY` enables the concrete Brave `WebSearchProvider`; when acquisition fails or is unavailable, planning continues through the local fallback. Keep `.env` local: it is excluded from both Git and Docker build contexts.
+
+## Run with Docker
+
+### Docker architecture
+
+Docker Compose runs CareerPilot as two services on a private Compose network. The frontend image builds the React application and serves its static files through Nginx. The browser reaches Nginx through host port `8080`; Nginx forwards requests under `/api/` to the internal FastAPI service named `backend`. The backend stores application data in the external `careerpilot-data` volume.
+
+```mermaid
+flowchart LR
+    Browser["Browser<br/>http://localhost:8080"]
+
+    subgraph Network["Docker Compose network"]
+        Frontend["Frontend service<br/>Nginx :80<br/>React static files"]
+        Backend["Backend service<br/>FastAPI / Uvicorn :8000<br/>internal only"]
+    end
+
+    Volume[("External named volume<br/>careerpilot-data<br/>careerpilot.db")]
+
+    Browser -->|"host port 8080"| Frontend
+    Frontend -->|"/api/* → backend:8000/*"| Backend
+    Backend -->|"/app/data/careerpilot.db"| Volume
+```
+
+The backend does not publish port `8000` to the host. Browser API requests use `http://localhost:8080/api/`; Nginx removes the `/api/` prefix and sends them to the backend over the Compose network.
+
+### Prerequisites and first-time setup
+
+Install Docker Desktop with Docker Compose, create the repository-root `.env` described above, and create the external volume once:
+
+```bash
+docker volume create careerpilot-data
+```
+
+The volume is declared as `external` in `compose.yaml`, so Compose expects it to exist rather than creating or owning it.
+
+### Start and use CareerPilot
+
+Build the images and start both services in the background:
+
+```bash
+docker compose up --build -d
+```
+
+Open `http://localhost:8080`, upload a PDF resume, paste a job description, and run the analysis.
+
+View combined logs, or only backend logs:
+
+```bash
+docker compose logs -f
+docker compose logs -f backend
+```
+
+Stop the services without removing their containers:
+
+```bash
+docker compose stop
+```
+
+Restart stopped containers without rebuilding:
+
+```bash
+docker compose start
+```
+
+Rebuild after changing application code or a Dockerfile:
+
+```bash
+docker compose up --build -d
+```
+
+Stop and remove the Compose containers and network:
+
+```bash
+docker compose down
+```
+
+### Docker volume lifecycle
+
+The backend receives `DATABASE_URL=sqlite:////app/data/careerpilot.db`, and `/app/data` is mounted from the external `careerpilot-data` volume. Resume records therefore survive backend container replacement, image rebuilds, and `docker compose down` followed by `docker compose up`.
+
+Both `docker compose down` and `docker compose down -v` leave `careerpilot-data` intact because it is explicitly configured as an external volume. The `-v` option removes Compose-managed named and anonymous volumes, not this external volume. To permanently delete CareerPilot's persisted application database, first stop the stack and then explicitly remove the external volume:
+
+```bash
+docker compose down
+docker volume rm careerpilot-data
+```
+
+The final command is destructive. Recreate the volume with `docker volume create careerpilot-data` before starting the stack again.
+
+## Run without Docker
+
+To run directly on the host, create a virtual environment and install the backend dependencies from the repository root:
+
+```bash
+python -m venv .venv
+# Activate .venv for your shell.
+pip install -r backend/requirements.txt pytest
+```
+
+Use the same repository-root `.env` described above.
 
 Start the backend from the repository root:
 
@@ -175,7 +269,7 @@ In another terminal, install and start the currently supported Vite frontend:
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
@@ -238,7 +332,7 @@ This logging path does not log API keys, resume content, resume evidence, gap re
 - Source freshness and cross-run acquisition caching are not implemented, so later planning runs may search or fetch again. Unchanged content still avoids re-embedding.
 - A full manifest-based index rebuild replaces the current RAG database contents, including independently acquired web knowledge.
 - The frontend does not display RAG source citations or provenance.
-- The repository does not yet provide a backend requirements or packaging file.
+- The Docker Compose volume persists the application database, but not the RAG database, across backend container recreation.
 
 ## Design principle
 
