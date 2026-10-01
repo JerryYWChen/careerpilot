@@ -53,7 +53,7 @@ function App() {
       const formData = new FormData()
       formData.append('file', resumeFile)
 
-      const uploadResponse = await fetch('http://127.0.0.1:8000/resume', {
+      const uploadResponse = await fetch('/api/resume', {
         method: 'POST',
         body: formData,
       })
@@ -67,7 +67,7 @@ function App() {
       console.log('Upload:', uploadData)
 
       const analyzeResponse = await fetch(
-        `http://127.0.0.1:8000/resume/${uploadData.resume_id}/analyze`,
+        `/api/resume/${uploadData.resume_id}/analyze`,
         {
           method: 'POST',
           headers: {
